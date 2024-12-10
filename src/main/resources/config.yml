@@ -1,0 +1,20 @@
+config:
+  menas:
+    - name: "&8&lBasic &7&lProtection" # Color
+      name_to_give: "basic"
+      block: "coal_ore"
+      dimension:
+        y : 15
+        x : 15
+    - name: "&8&lBasic &7&lProtection" # Color
+      name_to_give: "intermediate"
+      block: "coal_ore"
+      dimension:
+        y: 30
+        x: 30
+    - name: "&8&lBasic &7&lProtection" # Color
+      name_to_give: "advanced"
+      block: "coal_ore"
+      dimension:
+        y: 80
+        x: 80

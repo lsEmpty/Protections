@@ -1,0 +1,6 @@
+main: protections.ProtectionsPlugin
+version: 1.0.0
+name: Protections
+author: lsEmpty
+api-version: 1.13
+description: This plugin is to add protections on your server.
