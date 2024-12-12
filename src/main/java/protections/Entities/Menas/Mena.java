@@ -1,4 +1,4 @@
-package protections.Entities;
+package protections.Entities.Menas;
 
 public class Mena {
     private String name;

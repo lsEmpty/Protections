@@ -2,8 +2,8 @@ package protections.Config.Manager;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import protections.Config.CustomConfig;
-import protections.Entities.Dimension;
-import protections.Entities.Mena;
+import protections.Entities.Menas.Dimension;
+import protections.Entities.Menas.Mena;
 import protections.ProtectionsPlugin;
 
 import java.util.ArrayList;
@@ -13,6 +13,14 @@ import java.util.Map;
 public class ConfigManager {
     private final CustomConfig customConfig;
     private List<Mena> menas;
+
+    // Credentials
+    private String host;
+    private String port;
+    private String database_name;
+    private String optional_parameters;
+    private String user;
+    private String password;
 
     public ConfigManager(ProtectionsPlugin plugin) {
         customConfig = new CustomConfig("config.yml", null, plugin);
@@ -39,9 +47,39 @@ public class ConfigManager {
             Integer x = (Integer) dimension.get("x");
             this.menas.add(new Mena(name, name_to_use, block, new Dimension(y, x)));
         });
+        this.host = (String) config.get("credentials.host");
+        this.port = (String) config.get("credentials.port");
+        this.database_name = (String) config.get("credentials.database_name");
+        this.optional_parameters = (String) config.get("credentials.optional_parameters");
+        this.user = (String) config.get("credentials.user");
+        this.password = (String) config.get("credentials.password");
     }
 
     public List<Mena> getMenas() {
         return menas;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public String getDatabase_name() {
+        return database_name;
+    }
+
+    public String getOptional_parameters() {
+        return optional_parameters;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

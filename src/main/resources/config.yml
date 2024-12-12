@@ -18,3 +18,11 @@ config:
       dimension:
         y: 80
         x: 80
+
+credentials:
+  host: ""
+  port: ""
+  database_name: ""
+  optional_parameters: ""
+  user: ""
+  password: ""

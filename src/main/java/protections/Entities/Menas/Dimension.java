@@ -1,4 +1,4 @@
-package protections.Entities;
+package protections.Entities.Menas;
 
 public class Dimension {
     private int y;
