@@ -35,13 +35,13 @@ public class BridgeConnection {
         config.setPassword(password);
 
         // Pool
-        config.setMaximumPoolSize(10); // Maximum pool connection
-        config.setMinimumIdle(2); // Minimum pool inactive connection (ready to use)
+        config.setMaximumPoolSize(30); // Maximum pool connection
+        config.setMinimumIdle(10); // Minimum pool inactive connection (ready to use)
         config.setIdleTimeout(30000); // Time in milliseconds to close inactive connections
         config.setConnectionTimeout(30000); // Maximum time to wait an available connection
         config.setDriverClassName("com.mysql.cj.jdbc.Driver");
 
-        dataSource = new HikariDataSource();
+        dataSource = new HikariDataSource(config);
     }
 
     public Connection getConnection() throws SQLException {

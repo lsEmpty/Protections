@@ -4,3 +4,19 @@ name: Protections
 author: lsEmpty
 api-version: 1.13
 description: This plugin is to add protections on your server.
+
+commands:
+  pc:
+    description: It contains all the commands that an user can use.
+  pca:
+    description: It contains all the commands that a admin can use.
+
+permissions:
+  protections.admin:
+    description: The user with this permission can use all commands.
+    default: op
+    children:
+      protections.user: true
+  protections.user:
+    description: The user with this permission can only use protection commands.
+    default: true

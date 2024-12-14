@@ -1,16 +1,25 @@
 package protections;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
+import protections.Commands.AdminCommand;
 import protections.Config.Manager.ConfigManager;
 import protections.DataBase.BridgeConnection;
+import protections.DataBase.Procedures.ProtectionsProcedures;
+import protections.DatabaseEntities.Protections.Coordinate;
+import protections.DatabaseEntities.Protections.Protection;
+import protections.Listeners.ProtectionListener;
 import protections.Utils.MessageUtil;
+
+import java.util.Map;
 
 public class ProtectionsPlugin extends JavaPlugin {
 
     public static String prefix = MessageUtil.Color("&b&lProtections &8&l» ");
     public static ConfigManager mainConfigManager;
     public static BridgeConnection connection;
+    public static Map<Location, Protection> protections;
 
     // Credentials
     private String host;
@@ -24,6 +33,9 @@ public class ProtectionsPlugin extends JavaPlugin {
         mainConfigManager = new ConfigManager(this);
         getCredentials();
         connection = new BridgeConnection(host, port, database_name, optional_parameters, user, password);
+        saveCommands();
+        saveListeners();
+        protections = ProtectionsProcedures.getProtectionsInUse();
         Bukkit.getConsoleSender().sendMessage(prefix+"enabled");
     }
 
@@ -38,5 +50,13 @@ public class ProtectionsPlugin extends JavaPlugin {
         this.optional_parameters = mainConfigManager.getOptional_parameters();
         this.user = mainConfigManager.getUser();
         this.password = mainConfigManager.getPassword();
+    }
+
+    private void saveCommands(){
+        getCommand("pca").setExecutor(new AdminCommand(this));
+    }
+
+    private void saveListeners(){
+        getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
     }
 }

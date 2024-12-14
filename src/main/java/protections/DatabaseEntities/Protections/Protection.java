@@ -22,6 +22,15 @@ public class Protection {
         this.block_coordinate = block_coordinate;
     }
 
+    public Protection(String name, boolean in_use, String owner, UUID owner_uuid, String world, Coordinate block_coordinate) {
+        this.name = name;
+        this.in_use = in_use;
+        this.owner = owner;
+        this.owner_uuid = owner_uuid;
+        this.world = world;
+        this.block_coordinate = block_coordinate;
+    }
+
     public long getId() {
         return id;
     }

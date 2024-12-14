@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS `protections_db`.`block_coordinate` (
   `x` DOUBLE NOT NULL,
   `y` DOUBLE NOT NULL,
   `z` DOUBLE NOT NULL,
-  `x_dimension` DOUBLE NOT NULL,
-  `y_dimension` DOUBLE NOT NULL,
+  `x_dimension` INT NOT NULL,
+  `y_dimension` INT NOT NULL,
   `date_the_block_was_placed` DATETIME NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -45,7 +45,7 @@ create procedure get_protections_in_use()
 begin
 	select p.id 'ID_PROTECTION', p.name 'NAME', p.owner 'OWNER', p.in_use 'IN_USE', p.owner_uuid 'OWNER_UUID', p.world 'WORLD',
 	bl_c.x 'X', bl_c.y 'Y', bl_c.z 'Z', bl_c.date_the_block_was_placed 'DATE',
-    bl_c.x_dimension 'X_DIMENSION', blc.y_dimension 'Y_DIMENSION'
+    bl_c.x_dimension 'X_DIMENSION', bl_c.y_dimension 'Y_DIMENSION'
     from protections p
     inner join block_coordinate bl_c on p.id_block_coordinate = bl_c.id
     where p.in_use = true;
@@ -72,6 +72,7 @@ begin
     set in_use = pa_state
     where p.id = pa_id;
 end;$$
+
 
 create procedure change_owner_protection(
 	pa_id bigint,
@@ -111,8 +112,18 @@ create procedure get_id_from_block_coordinate_with_coordinate(
     pa_z double
 )
 begin
-	select id
+	select id 'ID'
     from block_coordinate bl_c where bl_c.x = pa_x and bl_c.y = pa_y and bl_c.z = pa_z
-    order by bl_c.date desc
+    order by bl_c.date_the_block_was_placed desc
     limit 1;
 end;$$
+
+create procedure get_id_from_protections_with_block_coordinate_id(
+	pa_id_block_coordinate int
+)
+begin
+	select p.id 'ID' from protections p
+    where p.id_block_coordinate = pa_id_block_coordinate
+    limit 1;
+end$$
+DELIMITER ;
