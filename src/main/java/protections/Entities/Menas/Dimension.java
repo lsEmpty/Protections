@@ -1,30 +1,30 @@
 package protections.Entities.Menas;
 
 public class Dimension {
-    private int y;
     private int x;
+    private int z;
 
     public Dimension() {
     }
 
-    public Dimension(int y, int x) {
-        this.y = y;
+    public Dimension(int x, int z) {
         this.x = x;
-    }
-
-    public int getY() {
-        return y;
+        this.z = z;
     }
 
     public int getX() {
         return x;
     }
 
-    public void setY(int y) {
-        this.y = y;
+    public int getZ() {
+        return z;
     }
 
     public void setX(int x) {
         this.x = x;
+    }
+
+    public void setZ(int z) {
+        this.z = z;
     }
 }

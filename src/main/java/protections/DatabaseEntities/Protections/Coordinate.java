@@ -9,16 +9,16 @@ public class Coordinate {
     private double y;
     private double z;
     private double x_dimension;
-    private double y_dimension;
+    private double z_dimension;
     private final LocalDateTime date_the_block_was_placed;
 
 
-    public Coordinate(double x, double y, double z, double x_dimension, double y_dimension, LocalDateTime date_the_block_was_placed) {
+    public Coordinate(double x, double y, double z, double x_dimension, double z_dimension, LocalDateTime date_the_block_was_placed) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.x_dimension = x_dimension;
-        this.y_dimension = y_dimension;
+        this.z_dimension = z_dimension;
         this.date_the_block_was_placed = date_the_block_was_placed;
     }
 
@@ -42,8 +42,8 @@ public class Coordinate {
         return x_dimension;
     }
 
-    public double getY_dimension() {
-        return y_dimension;
+    public double getZ_dimension() {
+        return z_dimension;
     }
 
     public LocalDateTime getDate_the_block_was_placed() {
@@ -66,7 +66,7 @@ public class Coordinate {
         this.x_dimension = x_dimension;
     }
 
-    public void setY_dimension(double y_dimension) {
-        this.y_dimension = y_dimension;
+    public void setZ_dimension(double z_dimension) {
+        this.z_dimension = z_dimension;
     }
 }

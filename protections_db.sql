@@ -5,12 +5,12 @@ USE `protections_db` ;
 -- Table `protections_db`.`block_coordinate`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `protections_db`.`block_coordinate` (
-  `id` BIGINT NOT NULL auto_increment,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `x` DOUBLE NOT NULL,
   `y` DOUBLE NOT NULL,
   `z` DOUBLE NOT NULL,
-  `x_dimension` INT NOT NULL,
-  `y_dimension` INT NOT NULL,
+  `x_dimension` DOUBLE NOT NULL,
+  `z_dimension` DOUBLE NOT NULL,
   `date_the_block_was_placed` DATETIME NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
@@ -20,7 +20,7 @@ ENGINE = InnoDB;
 -- Table `protections_db`.`protections`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `protections_db`.`protections` (
-  `id` BIGINT NOT NULL auto_increment,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(20) NOT NULL,
   `in_use` TINYINT NOT NULL,
   `owner` VARCHAR(18) NOT NULL,
@@ -45,7 +45,7 @@ create procedure get_protections_in_use()
 begin
 	select p.id 'ID_PROTECTION', p.name 'NAME', p.owner 'OWNER', p.in_use 'IN_USE', p.owner_uuid 'OWNER_UUID', p.world 'WORLD',
 	bl_c.x 'X', bl_c.y 'Y', bl_c.z 'Z', bl_c.date_the_block_was_placed 'DATE',
-    bl_c.x_dimension 'X_DIMENSION', bl_c.y_dimension 'Y_DIMENSION'
+    bl_c.x_dimension 'X_DIMENSION', bl_c.z_dimension 'z_dimension'
     from protections p
     inner join block_coordinate bl_c on p.id_block_coordinate = bl_c.id
     where p.in_use = true;
@@ -98,12 +98,12 @@ create procedure create_new_block_coordinate(
     pa_y double,
     pa_z double,
     pa_x_dimension double,
-    pa_y_dimension double,
+    pa_z_dimension double,
     pa_date_the_block_was_placed datetime
 )
 begin
-	insert into block_coordinate(x, y, z, x_dimension, y_dimension, date_the_block_was_placed) 
-    values(pa_x, pa_y, pa_z, pa_x_dimension, pa_y_dimension, pa_date_the_block_was_placed);
+	insert into block_coordinate(x, y, z, x_dimension, z_dimension, date_the_block_was_placed) 
+    values(pa_x, pa_y, pa_z, pa_x_dimension, pa_z_dimension, pa_date_the_block_was_placed);
 end;$$
 
 create procedure get_id_from_block_coordinate_with_coordinate(
@@ -127,3 +127,5 @@ begin
     limit 1;
 end$$
 DELIMITER ;
+select * from protections;
+select * from block_coordinate;

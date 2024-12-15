@@ -43,9 +43,9 @@ public class ConfigManager {
             String name_to_use = (String) mena.get("name_to_give");
             String block = (String) mena.get("block");
             Map<?, ?> dimension = (Map<?, ?>) mena.get("dimension");
-            Integer y = (Integer) dimension.get("y");
             Integer x = (Integer) dimension.get("x");
-            this.menas.add(new Mena(name, name_to_use, block, new Dimension(y, x)));
+            Integer z = (Integer) dimension.get("z");
+            this.menas.add(new Mena(name, name_to_use, block, new Dimension(x, z)));
         });
         this.host = (String) config.get("credentials.host");
         this.port = (String) config.get("credentials.port");

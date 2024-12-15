@@ -6,11 +6,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageUtil {
-    public static String Color(String message){
-        return ChatColor.translateAlternateColorCodes('&', MessageHexColor(message));
+    public static String color(String message){
+        return ChatColor.translateAlternateColorCodes('&', messageHexColor(message));
     }
 
-    private static String MessageHexColor(String message) {
+    private static String messageHexColor(String message) {
         Pattern pattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
         Matcher matcher = pattern.matcher(message);
         StringBuffer buffer = new StringBuffer();

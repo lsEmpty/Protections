@@ -23,14 +23,15 @@ public class AdminCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+        System.out.println("HOla");
         if (!sender.hasPermission("protections.admin")){
-            sender.sendMessage(prefix+MessageUtil.Color("&cYou don't have permissions to use this command."));
+            sender.sendMessage(prefix+MessageUtil.color("&cYou don't have permissions to use this command."));
             return true;
         }
         GiveProtection giveProtection = new GiveProtection();
         if (args.length == 2){
             if (!(sender instanceof Player)){
-                sender.sendMessage(prefix+ MessageUtil.Color("&cTo use this command you must be a player."));
+                sender.sendMessage(prefix+ MessageUtil.color("&cTo use this command you must be a player."));
                 return true;
             }
             if (args[0].equalsIgnoreCase("give")){

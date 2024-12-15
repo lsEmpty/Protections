@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class ProtectionsPlugin extends JavaPlugin {
 
-    public static String prefix = MessageUtil.Color("&b&lProtections &8&l» ");
+    public static String prefix = MessageUtil.color("&b&lProtections &8&l» ");
     public static ConfigManager mainConfigManager;
     public static BridgeConnection connection;
     public static Map<Location, Protection> protections;

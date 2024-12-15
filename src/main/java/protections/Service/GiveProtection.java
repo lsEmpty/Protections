@@ -20,11 +20,11 @@ import static protections.ProtectionsPlugin.prefix;
 
 public class GiveProtection {
     public static final String X_DIMENSION = "x_dimension";
-    public static final String Y_DIMENSION = "y_dimension";
+    public static final String Z_DIMENSION = "z_dimension";
     public ItemStack give(Player sender, String name_to_give, ProtectionsPlugin plugin){
         Mena mena = verifyBlock(name_to_give);
         if (mena == null){
-            sender.sendMessage(prefix+MessageUtil.Color("&eYou most place a mena that exists."));
+            sender.sendMessage(prefix+MessageUtil.color("&eYou most place a mena that exists."));
             return null;
         }
         Material material_set = null;
@@ -34,19 +34,19 @@ public class GiveProtection {
             }
         }
         if (material_set == null){
-            sender.sendMessage(prefix+MessageUtil.Color("&eError in data config."));
+            sender.sendMessage(prefix+MessageUtil.color("&eError in data config."));
             return null;
         }
         ItemStack protection = new ItemStack(material_set);
         ItemMeta protection_meta = protection.getItemMeta();
         protection_meta.addEnchant(Enchantment.LUCK, 1, true);
         protection_meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        protection_meta.setDisplayName(MessageUtil.Color(mena.getName()));
+        protection_meta.setDisplayName(MessageUtil.color(mena.getName()));
         PersistentDataContainer container = protection_meta.getPersistentDataContainer();
         container.set(new NamespacedKey(plugin, X_DIMENSION), PersistentDataType.INTEGER, mena.getDimension().getX());
-        container.set(new NamespacedKey(plugin, Y_DIMENSION), PersistentDataType.INTEGER, mena.getDimension().getY());
+        container.set(new NamespacedKey(plugin, Z_DIMENSION), PersistentDataType.INTEGER, mena.getDimension().getZ());
         protection.setItemMeta(protection_meta);
-        sender.sendMessage(prefix+MessageUtil.Color("&aMena delivered."));
+        sender.sendMessage(prefix+MessageUtil.color("&aMena delivered."));
         return protection;
     }
 

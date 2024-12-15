@@ -34,10 +34,10 @@ public class ProtectionsProcedures {
                 double y = resultSet.getDouble("y");
                 double z = resultSet.getDouble("z");
                 int x_dimension = resultSet.getInt("x_dimension");
-                int y_dimension = resultSet.getInt("y_dimension");
+                int z_dimension = resultSet.getInt("z_dimension");
                 LocalDateTime date = resultSet.getObject("date", LocalDateTime.class);
                 Location location = new Location(Bukkit.getWorld(world), x, y, z);
-                Coordinate coordinate = new Coordinate(x, y, z, x_dimension, y_dimension, date);
+                Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
                 Protection protection = new Protection(id, name, in_use, owner, owner_uuid, world, coordinate);
                 mapProtections.put(location , protection);
             }

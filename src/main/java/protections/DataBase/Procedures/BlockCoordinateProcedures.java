@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public class BlockCoordinateProcedures {
-    public static void createNewBlockCoordinate(double x, double y, double z, int x_dimension, int y_dimension, LocalDateTime date){
+    public static void createNewBlockCoordinate(double x, double y, double z, int x_dimension, int z_dimension, LocalDateTime date){
         String query = "{call create_new_block_coordinate(?, ?, ?, ?, ?, ?)}";
         try(Connection connection = ProtectionsPlugin.connection.getConnection();
             CallableStatement statement = connection.prepareCall(query)){
@@ -17,7 +17,7 @@ public class BlockCoordinateProcedures {
             statement.setDouble(2, y);
             statement.setDouble(3, z);
             statement.setInt(4, x_dimension);
-            statement.setInt(5, y_dimension);
+            statement.setInt(5, z_dimension);
             statement.setObject(6, date);
             statement.execute();
         }catch (SQLException e){
