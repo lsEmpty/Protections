@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import protections.DatabaseEntities.Protections.Coordinate;
 import protections.DatabaseEntities.Protections.Protection;
+import protections.Entities.Grid.ProtectionGrid;
 import protections.ProtectionsPlugin;
 import protections.Utils.BinaryUtil;
 
@@ -40,6 +41,7 @@ public class ProtectionsProcedures {
                 Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
                 Protection protection = new Protection(id, name, in_use, owner, owner_uuid, world, coordinate);
                 mapProtections.put(location , protection);
+                ProtectionGrid.addProtectionToGrid(protection);
             }
         }catch (SQLException e){
             System.err.println("Error:" + e);

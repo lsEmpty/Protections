@@ -9,6 +9,7 @@ import protections.DataBase.BridgeConnection;
 import protections.DataBase.Procedures.ProtectionsProcedures;
 import protections.DatabaseEntities.Protections.Coordinate;
 import protections.DatabaseEntities.Protections.Protection;
+import protections.Entities.Grid.ProtectionGrid;
 import protections.Listeners.ProtectionListener;
 import protections.Utils.MessageUtil;
 
@@ -20,6 +21,7 @@ public class ProtectionsPlugin extends JavaPlugin {
     public static ConfigManager mainConfigManager;
     public static BridgeConnection connection;
     public static Map<Location, Protection> protections;
+    public static ProtectionGrid protectionGrid;
 
     // Credentials
     private String host;
@@ -35,6 +37,7 @@ public class ProtectionsPlugin extends JavaPlugin {
         connection = new BridgeConnection(host, port, database_name, optional_parameters, user, password);
         saveCommands();
         saveListeners();
+        protectionGrid = new ProtectionGrid(100);
         protections = ProtectionsProcedures.getProtectionsInUse();
         Bukkit.getConsoleSender().sendMessage(prefix+"enabled");
     }

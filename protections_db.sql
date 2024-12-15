@@ -127,5 +127,3 @@ begin
     limit 1;
 end$$
 DELIMITER ;
-select * from protections;
-select * from block_coordinate;

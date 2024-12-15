@@ -2,10 +2,12 @@ package protections.Listeners;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -14,20 +16,27 @@ import protections.DataBase.Procedures.BlockCoordinateProcedures;
 import protections.DataBase.Procedures.ProtectionsProcedures;
 import protections.DatabaseEntities.Protections.Coordinate;
 import protections.DatabaseEntities.Protections.Protection;
+import protections.Entities.Grid.ProtectionGrid;
+import protections.Entities.Grid.ProtectionRegion;
 import protections.ProtectionsPlugin;
 import protections.Service.CheckIntersections;
+import protections.Service.EnterAndLeave;
 import protections.Service.GiveProtection;
 import protections.Utils.MessageUtil;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static protections.ProtectionsPlugin.prefix;
+import static protections.ProtectionsPlugin.protectionGrid;
 
 public class ProtectionListener implements Listener {
 
     ProtectionsPlugin plugin;
+    private final Map<Player, ProtectionRegion> playerStates = new HashMap<>();
 
     public ProtectionListener(ProtectionsPlugin plugin) {
         this.plugin = plugin;
@@ -63,6 +72,8 @@ public class ProtectionListener implements Listener {
             BlockCoordinateProcedures.createNewBlockCoordinate(x, y, z, x_dimension, z_dimension, date);
             long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
             ProtectionsProcedures.createNewProtection(name, true, owner, uuid, world, id_block_coordinate);
+            event.getPlayer().sendMessage(prefix+MessageUtil.color("&eProtection placed."));
+            ProtectionGrid.addProtectionToGrid(new Protection(name, true, owner, uuid, world, coordinate));
         }
     }
 
@@ -77,6 +88,30 @@ public class ProtectionListener implements Listener {
             long id_to_change_state = BlockCoordinateProcedures.getIdFromProtectionsWithBlockCoordinateId(id_block_coordinate);
             ProtectionsProcedures.changeStateProtection(id_to_change_state, false);
             ProtectionsPlugin.protections.remove(location);
+            ProtectionGrid.removeProtectionToGrid(((long) (x)),((long) (z)));
         }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event){
+        Player player = event.getPlayer();
+        Location to = event.getTo();
+        Location from = event.getFrom();
+        // Ignore if the player doesn't move from the location
+        if (to.getBlockX() == from.getBlockX() && to.getBlockY() == from.getBlockY() && to.getBlockZ() == from.getBlockZ()) {
+            return;
+        }
+        // Get protections nearby player
+        List<ProtectionRegion> nearbyProtections = protectionGrid.getNearbyProtections(to.getBlockX(), to.getBlockZ());
+
+        // Verify if the player enters or leaves a protection
+        ProtectionRegion currentProtection = null;
+        for (ProtectionRegion protection : nearbyProtections) {
+            if (protection.contains(to.getBlockX(), to.getBlockZ())) {
+                currentProtection = protection;
+                break;
+            }
+        }
+        EnterAndLeave.verifyIfUserEntersOrLeavesAProtection(player, playerStates, currentProtection);
     }
 }
