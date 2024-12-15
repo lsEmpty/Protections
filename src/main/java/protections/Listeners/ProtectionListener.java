@@ -2,11 +2,14 @@ package protections.Listeners;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -101,17 +104,56 @@ public class ProtectionListener implements Listener {
         if (to.getBlockX() == from.getBlockX() && to.getBlockY() == from.getBlockY() && to.getBlockZ() == from.getBlockZ()) {
             return;
         }
-        // Get protections nearby player
-        List<ProtectionRegion> nearbyProtections = protectionGrid.getNearbyProtections(to.getBlockX(), to.getBlockZ());
+        ProtectionRegion currentProtection = getCurrentProtection(to);
+        EnterAndLeave.verifyIfUserEntersOrLeavesAProtection(player, playerStates, currentProtection);
+    }
+
+    @EventHandler
+    public void tntExplosionOnProtection(BlockExplodeEvent event){
+        List<Block> blocks_removed = event.blockList();
+        Location location = event.getBlock().getLocation();
+        explodeEvent(location, blocks_removed);
+    }
+
+    @EventHandler
+    public void entityExplosionOnProtection(EntityExplodeEvent event){
+        List<Block> blocks_removed = event.blockList();
+        Location location = event.getEntity().getLocation();
+        explodeEvent(location, blocks_removed);
+    }
+
+    private ProtectionRegion getCurrentProtection(Location location){
+        // Get protections nearby location - location is to
+        List<ProtectionRegion> nearbyProtections = protectionGrid.getNearbyProtections(location.getBlockX(), location.getBlockZ());
 
         // Verify if the player enters or leaves a protection
         ProtectionRegion currentProtection = null;
         for (ProtectionRegion protection : nearbyProtections) {
-            if (protection.contains(to.getBlockX(), to.getBlockZ())) {
+            if (protection.contains(location.getBlockX(), location.getBlockZ())) {
                 currentProtection = protection;
                 break;
             }
         }
-        EnterAndLeave.verifyIfUserEntersOrLeavesAProtection(player, playerStates, currentProtection);
+        return currentProtection;
+    }
+
+    private void explodeEvent(Location location, List<Block> blocks_removed){
+        ProtectionRegion currentProtection = getCurrentProtection(location);
+        if (currentProtection != null){
+            Block protection_block = null;
+            for (Block block_removed :  blocks_removed){
+                long x_r = block_removed.getX();
+                long y_r = block_removed.getY();
+                long z_r = block_removed.getZ();
+                if (x_r == currentProtection.getProtection().getBlock_coordinate().getX()
+                        && y_r == currentProtection.getProtection().getBlock_coordinate().getY()
+                        && z_r == currentProtection.getProtection().getBlock_coordinate().getZ()){
+                    protection_block = block_removed;
+                }
+            }
+            if (protection_block != null){
+                blocks_removed.remove(protection_block);
+            }
+        }
     }
 }

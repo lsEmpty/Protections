@@ -5,7 +5,7 @@ import protections.DatabaseEntities.Protections.Protection;
 
 public class ProtectionRegion {
     private final long minX, maxX, minZ, maxZ;
-    private Protection protection;
+    private final Protection protection;
 
     public ProtectionRegion(long minX, long maxX, long minZ, long maxZ, Protection protection) {
         this.minX = minX;

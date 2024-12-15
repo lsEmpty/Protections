@@ -25,7 +25,7 @@ public class ProtectionsProcedures {
             CallableStatement statement = connection.prepareCall(query);
             ResultSet resultSet = statement.executeQuery()){
             while (resultSet.next()){
-                long id = resultSet.getLong("id");
+                long id = resultSet.getLong("id_protection");
                 String name = resultSet.getString("name");
                 boolean in_use = resultSet.getBoolean("in_use");
                 String owner = resultSet.getString("owner");

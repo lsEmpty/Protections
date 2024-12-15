@@ -127,3 +127,5 @@ begin
     limit 1;
 end$$
 DELIMITER ;
+
+select * from protections;
