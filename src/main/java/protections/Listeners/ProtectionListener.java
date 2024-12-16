@@ -20,13 +20,16 @@ import protections.DataBase.Procedures.FlagsProcedures;
 import protections.DataBase.Procedures.ProtectionsProcedures;
 import protections.DatabaseEntities.Protections.Coordinate;
 import protections.DatabaseEntities.Protections.Flags;
+import protections.DatabaseEntities.Protections.MenaInformation;
 import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Grid.ProtectionGrid;
 import protections.Entities.Grid.ProtectionRegion;
+import protections.Entities.Menas.Mena;
 import protections.ProtectionsPlugin;
 import protections.Service.CheckIntersections;
 import protections.Service.EnterAndLeave;
 import protections.Service.GiveProtection;
+import protections.Utils.InventoryUtils;
 import protections.Utils.MessageUtil;
 
 import java.time.LocalDateTime;
@@ -37,6 +40,7 @@ import java.util.UUID;
 
 import static protections.ProtectionsPlugin.prefix;
 import static protections.ProtectionsPlugin.protectionGrid;
+import static protections.Service.GiveProtection.NAME_TO_GIVE;
 
 public class ProtectionListener implements Listener {
 
@@ -70,32 +74,50 @@ public class ProtectionListener implements Listener {
             String owner = event.getPlayer().getName();
             UUID uuid = event.getPlayer().getUniqueId();
             String world = event.getBlock().getWorld().getName();
+            String mena_name_to_give = container.get(new NamespacedKey(plugin, NAME_TO_GIVE), PersistentDataType.STRING);
+            MenaInformation mena_information = null;
+            for (MenaInformation menaInformation : ProtectionsPlugin.menas_on_db){
+                if (menaInformation.getName_to_give().equalsIgnoreCase(mena_name_to_give)){
+                    mena_information = menaInformation;
+                }
+            }
             Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
             BlockCoordinateProcedures.createNewBlockCoordinate(x, y, z, x_dimension, z_dimension, date);
             long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
-            Flags flags = new Flags(id_block_coordinate, true, true, false, false, true, true, true, true, false, false , false);
-            FlagsProcedures.create_flags(flags);
+            Flags flags = new Flags(true, true, false, false, true, true, true, true, false, false , false);
+            long id_flag = FlagsProcedures.create_flags_and_get_id(flags);
             ProtectionsPlugin.protections
                     .put(event.getBlock().getLocation(),
-                            new Protection(name, true, owner, uuid, world, coordinate, flags));
-            ProtectionsProcedures.createNewProtection(name, true, owner, uuid, world, id_block_coordinate, flags.getId());
+                            new Protection(name, true, owner, uuid, world, coordinate, flags, mena_information));
+            ProtectionsProcedures.createNewProtection(name, true, owner, uuid, world, id_block_coordinate, id_flag, mena_information.getId());
             event.getPlayer().sendMessage(prefix+MessageUtil.color("&eProtection placed."));
-            ProtectionGrid.addProtectionToGrid(new Protection(name, true, owner, uuid, world, coordinate, flags));
+            ProtectionGrid.addProtectionToGrid(new Protection(name, true, owner, uuid, world, coordinate, flags, mena_information));
         }
     }
 
     @EventHandler
-    public void whenAUserBrakeAProtection(BlockBreakEvent event){
+    public void whenAUserBreakAProtection(BlockBreakEvent event){
         Location location = event.getBlock().getLocation();
         if (ProtectionsPlugin.protections.containsKey(location)){
-            double x = location.getX();
-            double y = location.getY();
-            double z = location.getZ();
-            long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
-            long id_to_change_state = BlockCoordinateProcedures.getIdFromProtectionsWithBlockCoordinateId(id_block_coordinate);
-            ProtectionsProcedures.changeStateProtection(id_to_change_state, false);
-            ProtectionsPlugin.protections.remove(location);
-            ProtectionGrid.removeProtectionToGrid(((long) (x)),((long) (z)));
+            Protection protection = ProtectionsPlugin.protections.get(location);
+            if (event.getPlayer().getUniqueId().equals(protection.getOwner_uuid())){
+                double x = location.getX();
+                double y = location.getY();
+                double z = location.getZ();
+                long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
+                long id_to_change_state = BlockCoordinateProcedures.getIdFromProtectionsWithBlockCoordinateId(id_block_coordinate);
+                ProtectionsProcedures.changeStateProtection(id_to_change_state, false);
+                ProtectionsPlugin.protections.remove(location);
+                ProtectionGrid.removeProtectionToGrid(((long) (x)),((long) (z)));
+                if (InventoryUtils.isInventoryFull(event.getPlayer())){
+                    GiveProtection giveProtection = new GiveProtection();
+                    event.getBlock().getWorld().dropItem(location, giveProtection.giveOnlyProtection(protection.getMenaInformation().getName_to_give(), plugin));
+                    event.getPlayer().sendMessage(prefix+MessageUtil.color("&eMena removed."));
+                }
+                event.setDropItems(false);
+                return;
+            }
+            event.getPlayer().sendMessage(prefix+MessageUtil.color("&cYou must a owner of this protection."));
         }
     }
 

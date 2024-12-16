@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS `protections_db` DEFAULT CHARACTER SET utf8 ;
+CREATE SCHEMA IF NOT EXISTS `protections_db` DEFAULT CHARACTER SET utf8 ;
 USE `protections_db` ;
 
 -- -----------------------------------------------------
@@ -37,6 +37,18 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `protections_db`.`mena_information`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `protections_db`.`mena_information` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `name_to_give` VARCHAR(255) NOT NULL,
+  `material` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `protections_db`.`protections`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `protections_db`.`protections` (
@@ -48,9 +60,11 @@ CREATE TABLE IF NOT EXISTS `protections_db`.`protections` (
   `world` VARCHAR(255) NOT NULL,
   `id_block_coordinate` BIGINT NOT NULL,
   `id_flags` BIGINT NOT NULL,
-  PRIMARY KEY (`id`, `id_block_coordinate`, `id_flags`),
+  `id_mena_information` BIGINT NOT NULL,
+  PRIMARY KEY (`id`, `id_block_coordinate`, `id_flags`, `id_mena_information`),
   INDEX `fk_protections_block_coordinate1_idx` (`id_block_coordinate` ASC) VISIBLE,
   INDEX `fk_protections_flags1_idx` (`id_flags` ASC) VISIBLE,
+  INDEX `fk_protections_mena_information1_idx` (`id_mena_information` ASC) VISIBLE,
   CONSTRAINT `fk_protections_block_coordinate1`
     FOREIGN KEY (`id_block_coordinate`)
     REFERENCES `protections_db`.`block_coordinate` (`id`)
@@ -59,6 +73,11 @@ CREATE TABLE IF NOT EXISTS `protections_db`.`protections` (
   CONSTRAINT `fk_protections_flags1`
     FOREIGN KEY (`id_flags`)
     REFERENCES `protections_db`.`flags` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_protections_mena_information1`
+    FOREIGN KEY (`id_mena_information`)
+    REFERENCES `protections_db`.`mena_information` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -115,10 +134,13 @@ begin
     f.damage_mobs 'DAMAGE_MOBS', f.mob_spawning 'MOB_SPAWNING', f.block_break 'BLOCK_BREAK', 
     f.block_place 'BLOCK_PLACE', 
     f.ender_pearl 'ENDER_PEARL', f.item_drop 'ITEM_DROP', f.item_pickup 'ITEM_PICKUP',
-    f.leaf_decay 'LEAF_DECAY', f.explosion 'EXPLOSION', f.pvp 'PVP', f.tnt 'TNT'
+    f.leaf_decay 'LEAF_DECAY', f.explosion 'EXPLOSION', f.pvp 'PVP', f.tnt 'TNT',
+    /* --- Mena_Information ---*/
+    mi.name 'MENA_NAME', mi.name_to_give 'MENA_NAME_TO_GIVE', mi.material 'MENA_MATERIAL'
     from protections p
     inner join block_coordinate bl_c on p.id_block_coordinate = bl_c.id
     inner join flags f on p.id_flags = f.id
+    inner join mena_information mi on p.id_mena_information = mi.id
     where p.in_use = true;
 end;$$
 
@@ -129,10 +151,11 @@ create procedure create_new_protection(
     pa_owner_uuid binary(16),
     pa_world varchar(255),
     pa_id_block_coordinate bigint,
-    pa_id_flags bigint
+    pa_id_flags bigint,
+    pa_id_mena_information bigint
 )
 begin
-	insert into protections(name, in_use, owner, owner_uuid, world, id_block_coordinate, id_flags) values(pa_name, pa_in_use, pa_owner, pa_owner_uuid, pa_world, pa_id_block_coordinate, pa_id_flags);
+	insert into protections(name, in_use, owner, owner_uuid, world, id_block_coordinate, id_flags, id_mena_information) values(pa_name, pa_in_use, pa_owner, pa_owner_uuid, pa_world, pa_id_block_coordinate, pa_id_flags, pa_mena_information);
 end; $$
 
 create procedure change_state_protection(
@@ -221,8 +244,29 @@ begin
 	insert into flags(id, damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt)
     values (pa_id, pa_damage_mobs, pa_mob_spawning, pa_block_break, pa_block_place, pa_ender_pearl, pa_item_drop, pa_item_pickup, pa_leaf_decay, pa_explosion, pa_pvp, pa_tnt);
 end;$$
+
+-- -----------------------------------------------------
+-- PROCEDURES -- MENA_INFORMATION
+-- -----------------------------------------------------
+
+create procedure create_mena_information(
+    pa_name varchar(255),
+    pa_name_to_give varchar(255),
+    pa_material varchar(255)
+)
+begin
+	insert into mena_information( name, name_to_give, material)
+    values( pa_name, pa_name_to_give, pa_material);
+end;$$
+
+create procedure get_all_mena_information()
+begin
+	select mi.name 'name', mi.name_to_give 'name_to_give', mi.material 'material' from mena_information mi;
+end;$$
+
 DELIMITER ;
 
 select * from protections;
 select * from block_coordinate;
 select * from flags;
+select * from mena_information;

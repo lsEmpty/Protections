@@ -6,13 +6,15 @@ import protections.ProtectionsPlugin;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class FlagsProcedures {
-    public static void create_flags(Flags flags){
-        String query = "{call create_flags(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+    public static long create_flags_and_get_id(Flags flags){
+        long id = 0;
+        String query = "{? = call create_flags_and_get_id(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         try(Connection connection = ProtectionsPlugin.connection.getConnection();
             CallableStatement statement = connection.prepareCall(query)){
-            statement.setLong(1, flags.getId());
+            statement.registerOutParameter(1, Types.INTEGER);
             statement.setBoolean(2, flags.isDamage_mobs());
             statement.setBoolean(3, flags.isMob_spawning());
             statement.setBoolean(4, flags.isBlock_break());
@@ -25,8 +27,10 @@ public class FlagsProcedures {
             statement.setBoolean(11, flags.isPvp());
             statement.setBoolean(12, flags.isTnt());
             statement.execute();
+            id = statement.getLong(1);
         }catch(SQLException e){
             System.err.println("Error: " + e);
         }
+        return id;
     }
 }

@@ -12,8 +12,9 @@ public class Protection {
 
     private Coordinate block_coordinate;
     private Flags flags;
+    private MenaInformation menaInformation;
 
-    public Protection(long id, String name, boolean in_use, String owner, UUID owner_uuid, String world, Coordinate block_coordinate, Flags flags) {
+    public Protection(long id, String name, boolean in_use, String owner, UUID owner_uuid, String world, Coordinate block_coordinate, Flags flags, MenaInformation menaInformation) {
         this.id = id;
         this.name = name;
         this.in_use = in_use;
@@ -22,9 +23,10 @@ public class Protection {
         this.world = world;
         this.block_coordinate = block_coordinate;
         this.flags = flags;
+        this.menaInformation = menaInformation;
     }
 
-    public Protection(String name, boolean in_use, String owner, UUID owner_uuid, String world, Coordinate block_coordinate, Flags flags) {
+    public Protection(String name, boolean in_use, String owner, UUID owner_uuid, String world, Coordinate block_coordinate, Flags flags, MenaInformation menaInformation) {
         this.name = name;
         this.in_use = in_use;
         this.owner = owner;
@@ -32,6 +34,7 @@ public class Protection {
         this.world = world;
         this.block_coordinate = block_coordinate;
         this.flags = flags;
+        this.menaInformation = menaInformation;
     }
 
     public long getId() {
@@ -92,5 +95,13 @@ public class Protection {
 
     public void setFlags(Flags flags) {
         this.flags = flags;
+    }
+
+    public void setMenaInformation(MenaInformation menaInformation) {
+        this.menaInformation = menaInformation;
+    }
+
+    public MenaInformation getMenaInformation() {
+        return menaInformation;
     }
 }

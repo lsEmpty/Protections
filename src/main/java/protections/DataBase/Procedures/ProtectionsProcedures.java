@@ -4,8 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import protections.DatabaseEntities.Protections.Coordinate;
 import protections.DatabaseEntities.Protections.Flags;
+import protections.DatabaseEntities.Protections.MenaInformation;
 import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Grid.ProtectionGrid;
+import protections.Entities.Menas.Mena;
 import protections.ProtectionsPlugin;
 import protections.Utils.BinaryUtil;
 
@@ -48,11 +50,15 @@ public class ProtectionsProcedures {
                 boolean explosion = resultSet.getBoolean("explosion");
                 boolean pvp = resultSet.getBoolean("pvp");
                 boolean tnt = resultSet.getBoolean("tnt");
+                String mena_name = resultSet.getString("mena_name");
+                String mena_name_to_give= resultSet.getString("mena_name_to_give");
+                String mena_material = resultSet.getString("mena_material");
                 LocalDateTime date = resultSet.getObject("date", LocalDateTime.class);
                 Location location = new Location(Bukkit.getWorld(world), x, y, z);
                 Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
                 Flags flags = new Flags(damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt);
-                Protection protection = new Protection(id, name, in_use, owner, owner_uuid, world, coordinate, flags);
+                MenaInformation menaInformation = new MenaInformation(mena_name, mena_name_to_give, mena_material);
+                Protection protection = new Protection(id, name, in_use, owner, owner_uuid, world, coordinate, flags, menaInformation);
                 mapProtections.put(location , protection);
                 ProtectionGrid.addProtectionToGrid(protection);
             }
@@ -62,8 +68,8 @@ public class ProtectionsProcedures {
         return mapProtections;
     }
 
-    public static void createNewProtection(String name, boolean in_use, String owner, UUID owner_uuid, String world, long id_block_coordinate, long id_flags){
-        String query = "{call create_new_protection(?, ?, ?, ?, ?, ?, ?)}";
+    public static void createNewProtection(String name, boolean in_use, String owner, UUID owner_uuid, String world, long id_block_coordinate, long id_flags, long id_mena_information){
+        String query = "{call create_new_protection(?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection connection = ProtectionsPlugin.connection.getConnection();
              CallableStatement statement = connection.prepareCall(query)){
             statement.setString(1, name);
@@ -73,6 +79,7 @@ public class ProtectionsProcedures {
             statement.setString(5, world);
             statement.setLong(6, id_block_coordinate);
             statement.setLong(7, id_flags);
+            statement.setLong(8, id_mena_information);
             statement.execute();
         }catch (SQLException e){
             System.err.println("Error:" + e);

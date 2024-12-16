@@ -23,7 +23,6 @@ public class AdminCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-        System.out.println("HOla");
         if (!sender.hasPermission("protections.admin")){
             sender.sendMessage(prefix+MessageUtil.color("&cYou don't have permissions to use this command."));
             return true;
