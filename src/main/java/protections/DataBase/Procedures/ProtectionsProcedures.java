@@ -3,6 +3,7 @@ package protections.DataBase.Procedures;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import protections.DatabaseEntities.Protections.Coordinate;
+import protections.DatabaseEntities.Protections.Flags;
 import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Grid.ProtectionGrid;
 import protections.ProtectionsPlugin;
@@ -36,10 +37,22 @@ public class ProtectionsProcedures {
                 double z = resultSet.getDouble("z");
                 int x_dimension = resultSet.getInt("x_dimension");
                 int z_dimension = resultSet.getInt("z_dimension");
+                boolean damage_mobs = resultSet.getBoolean("damage_mobs");
+                boolean mob_spawning = resultSet.getBoolean("mob_spawning");
+                boolean block_break = resultSet.getBoolean("block_break");
+                boolean block_place = resultSet.getBoolean("block_place");
+                boolean ender_pearl = resultSet.getBoolean("ender_pearl");
+                boolean item_drop = resultSet.getBoolean("item_drop");
+                boolean item_pickup = resultSet.getBoolean("item_pickup");
+                boolean leaf_decay = resultSet.getBoolean("leaf_decay");
+                boolean explosion = resultSet.getBoolean("explosion");
+                boolean pvp = resultSet.getBoolean("pvp");
+                boolean tnt = resultSet.getBoolean("tnt");
                 LocalDateTime date = resultSet.getObject("date", LocalDateTime.class);
                 Location location = new Location(Bukkit.getWorld(world), x, y, z);
                 Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
-                Protection protection = new Protection(id, name, in_use, owner, owner_uuid, world, coordinate);
+                Flags flags = new Flags(damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt);
+                Protection protection = new Protection(id, name, in_use, owner, owner_uuid, world, coordinate, flags);
                 mapProtections.put(location , protection);
                 ProtectionGrid.addProtectionToGrid(protection);
             }
@@ -49,8 +62,8 @@ public class ProtectionsProcedures {
         return mapProtections;
     }
 
-    public static void createNewProtection(String name, boolean in_use, String owner, UUID owner_uuid, String world, long id_block_coordinate){
-        String query = "{call create_new_protection(?, ?, ?, ?, ?, ?)}";
+    public static void createNewProtection(String name, boolean in_use, String owner, UUID owner_uuid, String world, long id_block_coordinate, long id_flags){
+        String query = "{call create_new_protection(?, ?, ?, ?, ?, ?, ?)}";
         try (Connection connection = ProtectionsPlugin.connection.getConnection();
              CallableStatement statement = connection.prepareCall(query)){
             statement.setString(1, name);
@@ -59,6 +72,7 @@ public class ProtectionsProcedures {
             statement.setBytes(4, BinaryUtil.uuidToBytes(owner_uuid));
             statement.setString(5, world);
             statement.setLong(6, id_block_coordinate);
+            statement.setLong(7, id_flags);
             statement.execute();
         }catch (SQLException e){
             System.err.println("Error:" + e);

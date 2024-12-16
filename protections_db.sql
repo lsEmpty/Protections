@@ -17,6 +17,26 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `protections_db`.`flags`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `protections_db`.`flags` (
+  `id` BIGINT NOT NULL,
+  `damage_mobs` TINYINT NOT NULL,
+  `mob_spawning` TINYINT NOT NULL,
+  `block_break` TINYINT NOT NULL,
+  `block_place` TINYINT NOT NULL,
+  `ender_pearl` TINYINT NOT NULL,
+  `item_drop` TINYINT NOT NULL,
+  `item_pickup` TINYINT NOT NULL,
+  `leaf_decay` TINYINT NOT NULL,
+  `explosion` TINYINT NOT NULL,
+  `pvp` TINYINT NOT NULL,
+  `tnt` TINYINT NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `protections_db`.`protections`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `protections_db`.`protections` (
@@ -27,11 +47,53 @@ CREATE TABLE IF NOT EXISTS `protections_db`.`protections` (
   `owner_uuid` BINARY(16) NOT NULL,
   `world` VARCHAR(255) NOT NULL,
   `id_block_coordinate` BIGINT NOT NULL,
-  PRIMARY KEY (`id`, `id_block_coordinate`),
+  `id_flags` BIGINT NOT NULL,
+  PRIMARY KEY (`id`, `id_block_coordinate`, `id_flags`),
   INDEX `fk_protections_block_coordinate1_idx` (`id_block_coordinate` ASC) VISIBLE,
+  INDEX `fk_protections_flags1_idx` (`id_flags` ASC) VISIBLE,
   CONSTRAINT `fk_protections_block_coordinate1`
     FOREIGN KEY (`id_block_coordinate`)
     REFERENCES `protections_db`.`block_coordinate` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_protections_flags1`
+    FOREIGN KEY (`id_flags`)
+    REFERENCES `protections_db`.`flags` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `protections_db`.`protection_members`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `protections_db`.`protection_members` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(18) NOT NULL,
+  `member_uuid` BINARY(16) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `protections_db`.`protections_has_protection_members`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `protections_db`.`protections_has_protection_members` (
+  `protections_id` BIGINT NOT NULL,
+  `protections_id_block_coordinate` BIGINT NOT NULL,
+  `protections_flags_id` BIGINT NOT NULL,
+  `protection_members_id` BIGINT NOT NULL,
+  PRIMARY KEY (`protections_id`, `protections_id_block_coordinate`, `protections_flags_id`, `protection_members_id`),
+  INDEX `fk_protections_has_protection_members_protection_members1_idx` (`protection_members_id` ASC) VISIBLE,
+  INDEX `fk_protections_has_protection_members_protections1_idx` (`protections_id` ASC, `protections_id_block_coordinate` ASC, `protections_flags_id` ASC) VISIBLE,
+  CONSTRAINT `fk_protections_has_protection_members_protections1`
+    FOREIGN KEY (`protections_id` , `protections_id_block_coordinate` , `protections_flags_id`)
+    REFERENCES `protections_db`.`protections` (`id` , `id_block_coordinate` , `id_flags`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_protections_has_protection_members_protection_members1`
+    FOREIGN KEY (`protection_members_id`)
+    REFERENCES `protections_db`.`protection_members` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -43,11 +105,20 @@ ENGINE = InnoDB;
 DELIMITER $$
 create procedure get_protections_in_use()
 begin
-	select p.id 'ID_PROTECTION', p.name 'NAME', p.owner 'OWNER', p.in_use 'IN_USE', p.owner_uuid 'OWNER_UUID', p.world 'WORLD',
+	select 
+    /* --- Protections ---*/
+    p.id 'ID_PROTECTION', p.name 'NAME', p.owner 'OWNER', p.in_use 'IN_USE', p.owner_uuid 'OWNER_UUID', p.world 'WORLD',
+    /* --- Block_Coordinates ---*/
 	bl_c.x 'X', bl_c.y 'Y', bl_c.z 'Z', bl_c.date_the_block_was_placed 'DATE',
-    bl_c.x_dimension 'X_DIMENSION', bl_c.z_dimension 'z_dimension'
+    bl_c.x_dimension 'X_DIMENSION', bl_c.z_dimension 'Z_DIMENSION',
+    /* --- Flags ---*/
+    f.damage_mobs 'DAMAGE_MOBS', f.mob_spawning 'MOB_SPAWNING', f.block_break 'BLOCK_BREAK', 
+    f.block_place 'BLOCK_PLACE', 
+    f.ender_pearl 'ENDER_PEARL', f.item_drop 'ITEM_DROP', f.item_pickup 'ITEM_PICKUP',
+    f.leaf_decay 'LEAF_DECAY', f.explosion 'EXPLOSION', f.pvp 'PVP', f.tnt 'TNT'
     from protections p
     inner join block_coordinate bl_c on p.id_block_coordinate = bl_c.id
+    inner join flags f on p.id_flags = f.id
     where p.in_use = true;
 end;$$
 
@@ -57,10 +128,11 @@ create procedure create_new_protection(
     pa_owner varchar(18),
     pa_owner_uuid binary(16),
     pa_world varchar(255),
-    pa_id_block_coordinate bigint
+    pa_id_block_coordinate bigint,
+    pa_id_flags bigint
 )
 begin
-	insert into protections(name, in_use, owner, owner_uuid, world, id_block_coordinate) values(pa_name, pa_in_use, pa_owner, pa_owner_uuid, pa_world, pa_id_block_coordinate);
+	insert into protections(name, in_use, owner, owner_uuid, world, id_block_coordinate, id_flags) values(pa_name, pa_in_use, pa_owner, pa_owner_uuid, pa_world, pa_id_block_coordinate, pa_id_flags);
 end; $$
 
 create procedure change_state_protection(
@@ -126,6 +198,31 @@ begin
     where p.id_block_coordinate = pa_id_block_coordinate
     limit 1;
 end$$
+
+-- -----------------------------------------------------
+-- PROCEDURES -- FLAGS
+-- -----------------------------------------------------
+
+create procedure create_flags(
+	pa_id bigint,
+    pa_damage_mobs boolean,
+    pa_mob_spawning boolean,
+    pa_block_break boolean,
+    pa_block_place boolean,
+    pa_ender_pearl boolean,
+    pa_item_drop boolean,
+    pa_item_pickup boolean,
+    pa_leaf_decay boolean,
+    pa_explosion boolean,
+    pa_pvp boolean,
+    pa_tnt boolean
+)
+begin
+	insert into flags(id, damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt)
+    values (pa_id, pa_damage_mobs, pa_mob_spawning, pa_block_break, pa_block_place, pa_ender_pearl, pa_item_drop, pa_item_pickup, pa_leaf_decay, pa_explosion, pa_pvp, pa_tnt);
+end;$$
 DELIMITER ;
 
 select * from protections;
+select * from block_coordinate;
+select * from flags;

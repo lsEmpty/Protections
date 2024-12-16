@@ -16,8 +16,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import protections.DataBase.Procedures.BlockCoordinateProcedures;
+import protections.DataBase.Procedures.FlagsProcedures;
 import protections.DataBase.Procedures.ProtectionsProcedures;
 import protections.DatabaseEntities.Protections.Coordinate;
+import protections.DatabaseEntities.Protections.Flags;
 import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Grid.ProtectionGrid;
 import protections.Entities.Grid.ProtectionRegion;
@@ -69,14 +71,16 @@ public class ProtectionListener implements Listener {
             UUID uuid = event.getPlayer().getUniqueId();
             String world = event.getBlock().getWorld().getName();
             Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
-            ProtectionsPlugin.protections
-                    .put(event.getBlock().getLocation(),
-                            new Protection(name, true, owner, uuid, world, coordinate));
             BlockCoordinateProcedures.createNewBlockCoordinate(x, y, z, x_dimension, z_dimension, date);
             long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
-            ProtectionsProcedures.createNewProtection(name, true, owner, uuid, world, id_block_coordinate);
+            Flags flags = new Flags(id_block_coordinate, true, true, false, false, true, true, true, true, false, false , false);
+            FlagsProcedures.create_flags(flags);
+            ProtectionsPlugin.protections
+                    .put(event.getBlock().getLocation(),
+                            new Protection(name, true, owner, uuid, world, coordinate, flags));
+            ProtectionsProcedures.createNewProtection(name, true, owner, uuid, world, id_block_coordinate, flags.getId());
             event.getPlayer().sendMessage(prefix+MessageUtil.color("&eProtection placed."));
-            ProtectionGrid.addProtectionToGrid(new Protection(name, true, owner, uuid, world, coordinate));
+            ProtectionGrid.addProtectionToGrid(new Protection(name, true, owner, uuid, world, coordinate, flags));
         }
     }
 
