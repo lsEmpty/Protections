@@ -8,11 +8,12 @@ import protections.Config.Manager.ConfigManager;
 import protections.DataBase.BridgeConnection;
 import protections.DataBase.Procedures.MenaInformationProcedures;
 import protections.DataBase.Procedures.ProtectionsProcedures;
-import protections.DatabaseEntities.Protections.Coordinate;
 import protections.DatabaseEntities.Protections.MenaInformation;
 import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Grid.ProtectionGrid;
 import protections.Entities.Menas.Mena;
+import protections.Listeners.PlayerEntersAndLeavesOnProtectionListener;
+import protections.Listeners.PlayerPlacesAndBreaksProtectionListener;
 import protections.Listeners.ProtectionListener;
 import protections.Utils.MessageUtil;
 
@@ -85,5 +86,7 @@ public class ProtectionsPlugin extends JavaPlugin {
 
     private void saveListeners(){
         getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerPlacesAndBreaksProtectionListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerEntersAndLeavesOnProtectionListener(), this);
     }
 }

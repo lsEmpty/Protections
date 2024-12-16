@@ -11,10 +11,11 @@ import java.util.Map;
 
 public class ProtectionGrid {
     private final int cellSize; // Cell Size
-    private final static Map<String, List<ProtectionRegion>> grid = new HashMap<>();
+    private static Map<String, List<ProtectionRegion>> grid;
 
     public ProtectionGrid(int cellSize) {
         this.cellSize = cellSize;
+        grid = new HashMap<>();
     }
 
     // Generate cell key (for coordinates)
@@ -57,17 +58,23 @@ public class ProtectionGrid {
         ProtectionsPlugin.protectionGrid.addProtection(new ProtectionRegion(min_x, max_x, min_z, max_z, protection));
     }
 
-    public static void removeProtectionToGrid(long x, long z){
-        long gridX = x / 100;
-        long gridZ = z / 100;
-        String cellKey = gridX + "," + gridZ;
+    public static void removeProtectionToGrid(long minX, long maxX, long minZ, long maxZ){
+        long startX = minX / 100;
+        long endX = maxX / 100;
+        long startZ = minZ / 100;
+        long endZ = maxZ / 100;
 
-        List<ProtectionRegion> protections = grid.get(cellKey);
-
-        protections.removeIf(region -> region.contains(x, z));
-
-        if (protections.isEmpty()) {
-            grid.remove(gridX + "," + gridZ);
+        for (long gridX = startX; gridX <= endX; gridX++) {
+            for (long gridZ = startZ; gridZ <= endZ; gridZ++) {
+                String cellKey = gridX + "," + gridZ;
+                List<ProtectionRegion> protections = grid.get(cellKey);
+                if (protections != null) {
+                    protections.removeIf(region -> region.intersects(minX, maxX, minZ, maxZ));
+                    if (protections.isEmpty()) {
+                        grid.remove(cellKey);
+                    }
+                }
+            }
         }
     }
 }

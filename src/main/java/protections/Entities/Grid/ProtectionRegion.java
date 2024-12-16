@@ -20,6 +20,10 @@ public class ProtectionRegion {
                 && z >= minZ && z <= maxZ;
     }
 
+    public boolean intersects(long minX, long maxX, long minZ, long maxZ) {
+        return !(this.maxX < minX || this.minX > maxX || this.maxZ < minZ || this.minZ > maxZ);
+    }
+
     public long getMinX() { return minX; }
     public long getMaxX() { return maxX; }
     public long getMinZ() { return minZ; }

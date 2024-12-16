@@ -1,6 +1,7 @@
 package protections.Commands;
 
 import com.google.protobuf.Message;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -36,12 +37,31 @@ public class AdminCommand implements CommandExecutor {
             if (args[0].equalsIgnoreCase("give")){
                 Player player_sender = (Player) sender;
                 if (!InventoryUtils.isInventoryFull(player_sender)){
-                    ItemStack mena_to_give = giveProtection.give(player_sender, args[1], plugin);
+                    ItemStack mena_to_give = giveProtection.give(sender, args[1], plugin);
                     if (mena_to_give != null){
                         player_sender.getInventory().addItem(mena_to_give);
                     }
                 }else{
                     sender.sendMessage(prefix+"&cYou have the full inventory.");
+                }
+                return true;
+            }
+        }
+        if (args.length == 3){
+            //pca give <player> <mena name>
+            if (args[0].equalsIgnoreCase("give")){
+                Player player_to_give = Bukkit.getPlayer(args[1]);
+                if (player_to_give == null){
+                    sender.sendMessage(prefix+MessageUtil.color("&cPlayer not found."));
+                    return true;
+                }
+                if (!InventoryUtils.isInventoryFull(player_to_give)){
+                    ItemStack mena_to_give = giveProtection.give(sender, args[2], plugin);
+                    if (mena_to_give != null){
+                        player_to_give.getInventory().addItem(mena_to_give);
+                    }
+                }else{
+                    sender.sendMessage(prefix+"&cThe user has the inventory full.");
                 }
                 return true;
             }

@@ -2,6 +2,7 @@ package protections.Service;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -23,7 +24,7 @@ public class GiveProtection {
     public static final String MATERIAL = "MENA_MATERIAL";
     public static final String X_DIMENSION = "x_dimension";
     public static final String Z_DIMENSION = "z_dimension";
-    public ItemStack give(Player sender, String name_to_give, ProtectionsPlugin plugin){
+    public ItemStack give(CommandSender sender, String name_to_give, ProtectionsPlugin plugin){
         Mena mena = verifyBlock(name_to_give);
         if (mena == null){
             sender.sendMessage(prefix+MessageUtil.color("&eYou most place a mena that exists."));
@@ -39,7 +40,9 @@ public class GiveProtection {
             sender.sendMessage(prefix+MessageUtil.color("&eError in data config."));
             return null;
         }
-        sender.sendMessage(prefix+MessageUtil.color("&aMena delivered."));
+        if (sender instanceof Player){
+            sender.sendMessage(prefix+MessageUtil.color("&aMena delivered."));
+        }
         return createMena(plugin, material_set, mena);
     }
 

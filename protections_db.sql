@@ -20,7 +20,7 @@ ENGINE = InnoDB;
 -- Table `protections_db`.`flags`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `protections_db`.`flags` (
-  `id` BIGINT NOT NULL,
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
   `damage_mobs` TINYINT NOT NULL,
   `mob_spawning` TINYINT NOT NULL,
   `block_break` TINYINT NOT NULL,
@@ -155,7 +155,7 @@ create procedure create_new_protection(
     pa_id_mena_information bigint
 )
 begin
-	insert into protections(name, in_use, owner, owner_uuid, world, id_block_coordinate, id_flags, id_mena_information) values(pa_name, pa_in_use, pa_owner, pa_owner_uuid, pa_world, pa_id_block_coordinate, pa_id_flags, pa_mena_information);
+	insert into protections(name, in_use, owner, owner_uuid, world, id_block_coordinate, id_flags, id_mena_information) values(pa_name, pa_in_use, pa_owner, pa_owner_uuid, pa_world, pa_id_block_coordinate, pa_id_flags, pa_id_mena_information);
 end; $$
 
 create procedure change_state_protection(
@@ -226,6 +226,30 @@ end$$
 -- PROCEDURES -- FLAGS
 -- -----------------------------------------------------
 
+create function create_flags_and_get_id(
+	pa_damage_mobs boolean,
+    pa_mob_spawning boolean,
+    pa_block_break boolean,
+    pa_block_place boolean,
+    pa_ender_pearl boolean,
+    pa_item_drop boolean,
+    pa_item_pickup boolean,
+    pa_leaf_decay boolean,
+    pa_explosion boolean,
+    pa_pvp boolean,
+    pa_tnt boolean
+)
+returns int
+deterministic
+begin
+	declare new_flag_id bigint;
+    insert into flags(damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt)
+    values (pa_damage_mobs, pa_mob_spawning, pa_block_break, pa_block_place, pa_ender_pearl, pa_item_drop, pa_item_pickup, pa_leaf_decay, pa_explosion, pa_pvp, pa_tnt);
+    
+    set new_flag_id = LAST_INSERT_ID();
+    return new_flag_id;
+end;$$
+
 create procedure create_flags(
 	pa_id bigint,
     pa_damage_mobs boolean,
@@ -261,12 +285,13 @@ end;$$
 
 create procedure get_all_mena_information()
 begin
-	select mi.name 'name', mi.name_to_give 'name_to_give', mi.material 'material' from mena_information mi;
+	select mi.id 'id', mi.name 'name', mi.name_to_give 'name_to_give', mi.material 'material' from mena_information mi;
 end;$$
-
 DELIMITER ;
 
 select * from protections;
 select * from block_coordinate;
 select * from flags;
 select * from mena_information;
+
+/**drop database protections_db;
