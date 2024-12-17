@@ -12,6 +12,15 @@ public class Coordinate {
     private double z_dimension;
     private final LocalDateTime date_the_block_was_placed;
 
+    public Coordinate(long id, double x, double y, double z, double x_dimension, double z_dimension, LocalDateTime date_the_block_was_placed) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.x_dimension = x_dimension;
+        this.z_dimension = z_dimension;
+        this.date_the_block_was_placed = date_the_block_was_placed;
+    }
 
     public Coordinate(double x, double y, double z, double x_dimension, double z_dimension, LocalDateTime date_the_block_was_placed) {
         this.x = x;

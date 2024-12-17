@@ -128,10 +128,11 @@ begin
     /* --- Protections ---*/
     p.id 'ID_PROTECTION', p.name 'NAME', p.owner 'OWNER', p.in_use 'IN_USE', p.owner_uuid 'OWNER_UUID', p.world 'WORLD',
     /* --- Block_Coordinates ---*/
+    bl_c.id 'ID_BLOCK_COORDINATES',
 	bl_c.x 'X', bl_c.y 'Y', bl_c.z 'Z', bl_c.date_the_block_was_placed 'DATE',
     bl_c.x_dimension 'X_DIMENSION', bl_c.z_dimension 'Z_DIMENSION',
     /* --- Flags ---*/
-    f.damage_mobs 'DAMAGE_MOBS', f.mob_spawning 'MOB_SPAWNING', f.block_break 'BLOCK_BREAK', 
+    f.id 'ID_FLAGS', f.damage_mobs 'DAMAGE_MOBS', f.mob_spawning 'MOB_SPAWNING', f.block_break 'BLOCK_BREAK', 
     f.block_place 'BLOCK_PLACE', 
     f.ender_pearl 'ENDER_PEARL', f.item_drop 'ITEM_DROP', f.item_pickup 'ITEM_PICKUP',
     f.leaf_decay 'LEAF_DECAY', f.explosion 'EXPLOSION', f.pvp 'PVP', f.tnt 'TNT',
@@ -250,25 +251,6 @@ begin
     return new_flag_id;
 end;$$
 
-create procedure create_flags(
-	pa_id bigint,
-    pa_damage_mobs boolean,
-    pa_mob_spawning boolean,
-    pa_block_break boolean,
-    pa_block_place boolean,
-    pa_ender_pearl boolean,
-    pa_item_drop boolean,
-    pa_item_pickup boolean,
-    pa_leaf_decay boolean,
-    pa_explosion boolean,
-    pa_pvp boolean,
-    pa_tnt boolean
-)
-begin
-	insert into flags(id, damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt)
-    values (pa_id, pa_damage_mobs, pa_mob_spawning, pa_block_break, pa_block_place, pa_ender_pearl, pa_item_drop, pa_item_pickup, pa_leaf_decay, pa_explosion, pa_pvp, pa_tnt);
-end;$$
-
 -- -----------------------------------------------------
 -- PROCEDURES -- MENA_INFORMATION
 -- -----------------------------------------------------
@@ -287,11 +269,51 @@ create procedure get_all_mena_information()
 begin
 	select mi.id 'id', mi.name 'name', mi.name_to_give 'name_to_give', mi.material 'material' from mena_information mi;
 end;$$
+
+-- -----------------------------------------------------
+-- PROCEDURES -- PROTECTIONS_MEMBERS
+-- -----------------------------------------------------
+
+create procedure add_member(
+	pa_protections_id bigint,
+    pa_protections_id_block_coordinate bigint,
+    pa_protections_flags_id bigint,
+    pa_protections_members_id bigint
+)
+begin
+	insert into protections_has_protection_members(protections_id, protections_id_block_coordinate, protections_flags_id, protections_members_id)
+    values(pa_protections_id, pa_protections_id_block_coordinate, pa_protections_flags_id, pa_protections_members_id);
+end;$$
+
+create procedure get_all_members()
+begin
+	select 
+    /* --- Protections ---*/
+    p.id 'ID_PROTECTION',
+    /* --- Protection_Member ---*/
+    pm.id 'ID_PROTECTION_MEMBER', pm.name 'NAME_PROTECTION_MEMBER', pm.member_uuid 'UUID_PROTECTION_MEMBER'
+    from protections_has_protection_members phpm
+    inner join protections p on phpm.protections_id = p.id
+    inner join protection_members pm on phpm.protection_members_id = pm.id
+    where p.in_use = true
+    order by phpm.protections_id desc;
+end;$$
+
+create procedure remove_member_from_protection(
+	pa_protections_id bigint,
+    pa_protections_members_id bigint
+)
+begin
+	delete from protections_has_protection_members phpm
+    where phpm.protections_id = pa_protections_id and phpm.protection_members_id = pa_protections_members_id;
+end;$$
+
 DELIMITER ;
 
 select * from protections;
 select * from block_coordinate;
 select * from flags;
 select * from mena_information;
+call get_all_members();
 
 /**drop database protections_db;

@@ -7,11 +7,14 @@ import protections.Commands.AdminCommand;
 import protections.Config.Manager.ConfigManager;
 import protections.DataBase.BridgeConnection;
 import protections.DataBase.Procedures.MenaInformationProcedures;
+import protections.DataBase.Procedures.ProtectionMembersProcedures;
 import protections.DataBase.Procedures.ProtectionsProcedures;
+import protections.DatabaseEntities.Protections.Member;
 import protections.DatabaseEntities.Protections.MenaInformation;
 import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Grid.ProtectionGrid;
 import protections.Entities.Menas.Mena;
+import protections.Listeners.FlagListener;
 import protections.Listeners.PlayerEntersAndLeavesOnProtectionListener;
 import protections.Listeners.PlayerPlacesAndBreaksProtectionListener;
 import protections.Listeners.ProtectionListener;
@@ -28,6 +31,7 @@ public class ProtectionsPlugin extends JavaPlugin {
     public static Map<Location, Protection> protections;
     public static ProtectionGrid protectionGrid;
     public static List<MenaInformation> menas_on_db;
+    public static Map<Long, List<Member>> protection_members;
 
     // Credentials
     private String host;
@@ -46,6 +50,7 @@ public class ProtectionsPlugin extends JavaPlugin {
         protectionGrid = new ProtectionGrid(100);
         protections = ProtectionsProcedures.getProtectionsInUse();
         fillMenaInformationOnDataBase();
+        getMembers();
         Bukkit.getConsoleSender().sendMessage(prefix+"enabled");
     }
 
@@ -80,6 +85,10 @@ public class ProtectionsPlugin extends JavaPlugin {
         menas_on_db = MenaInformationProcedures.get_all_mena_information();
     }
 
+    private void getMembers(){
+        protection_members = ProtectionMembersProcedures.get_all_members();
+    }
+
     private void saveCommands(){
         getCommand("pca").setExecutor(new AdminCommand(this));
     }
@@ -88,5 +97,6 @@ public class ProtectionsPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerPlacesAndBreaksProtectionListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerEntersAndLeavesOnProtectionListener(), this);
+        getServer().getPluginManager().registerEvents(new FlagListener(), this);
     }
 }

@@ -34,11 +34,13 @@ public class ProtectionsProcedures {
                 String owner = resultSet.getString("owner");
                 UUID owner_uuid = BinaryUtil.bytesToUUID(resultSet.getBytes("owner_uuid"));
                 String world = resultSet.getString("world");
+                long id_block_coordinates = resultSet.getLong("id_block_coordinates");
                 double x = resultSet.getDouble("x");
                 double y = resultSet.getDouble("y");
                 double z = resultSet.getDouble("z");
                 int x_dimension = resultSet.getInt("x_dimension");
                 int z_dimension = resultSet.getInt("z_dimension");
+                long id_flags = resultSet.getLong("id_flags");
                 boolean damage_mobs = resultSet.getBoolean("damage_mobs");
                 boolean mob_spawning = resultSet.getBoolean("mob_spawning");
                 boolean block_break = resultSet.getBoolean("block_break");
@@ -55,8 +57,8 @@ public class ProtectionsProcedures {
                 String mena_material = resultSet.getString("mena_material");
                 LocalDateTime date = resultSet.getObject("date", LocalDateTime.class);
                 Location location = new Location(Bukkit.getWorld(world), x, y, z);
-                Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
-                Flags flags = new Flags(damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt);
+                Coordinate coordinate = new Coordinate(id_block_coordinates, x, y, z, x_dimension, z_dimension, date);
+                Flags flags = new Flags(id_flags, damage_mobs, mob_spawning, block_break, block_place, ender_pearl, item_drop, item_pickup, leaf_decay, explosion, pvp, tnt);
                 MenaInformation menaInformation = new MenaInformation(mena_name, mena_name_to_give, mena_material);
                 Protection protection = new Protection(id, name, in_use, owner, owner_uuid, world, coordinate, flags, menaInformation);
                 mapProtections.put(location , protection);
