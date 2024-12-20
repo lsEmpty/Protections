@@ -11,14 +11,13 @@ import protections.Entities.Menas.Mena;
 import protections.ProtectionsPlugin;
 import protections.Utils.BinaryUtil;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.xml.transform.Result;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Phaser;
 
 public class ProtectionsProcedures {
     public static Map<Location, Protection> getProtectionsInUse(){
@@ -112,5 +111,40 @@ public class ProtectionsProcedures {
         }catch (SQLException e){
             System.err.println("Error:" + e);
         }
+    }
+
+    public static Map<UUID, Integer> getUserNumberHomes(){
+        Map<UUID, Integer> homes = new HashMap<>();
+        String query = "{call get_user_number_homes()}";
+        try (Connection connection = ProtectionsPlugin.connection.getConnection();
+        CallableStatement statement = connection.prepareCall(query);
+        ResultSet resultSet = statement.executeQuery()){
+            while(resultSet.next()){
+                UUID owner_uuid = BinaryUtil.bytesToUUID(resultSet.getBytes("owner_uuid"));
+                int number_homes = resultSet.getInt("number_of_homes");
+                homes.put(owner_uuid, number_homes);
+            }
+        }catch (SQLException e){
+            System.err.println("Error: " +e);
+        }
+        return homes;
+    }
+
+    public static long getIdProtectionWithIdBlockCoordinateAndIdFlags(long id_block_coordinate, long id_flags){
+        String query = "SELECT get_id_from_protections_by_coordinate_and_flags_id(?, ?)";
+        long id = 0;
+        try(Connection connection = ProtectionsPlugin.connection.getConnection();
+        PreparedStatement statement = connection.prepareCall(query)){
+            statement.setLong(1, id_block_coordinate);
+            statement.setLong(2, id_flags);
+            try (ResultSet resultSet = statement.executeQuery()){
+                while (resultSet.next()){
+                    id = resultSet.getLong(1);
+                }
+            }
+        }catch (SQLException e){
+            System.err.println("Error: " +e);
+        }
+        return id;
     }
 }

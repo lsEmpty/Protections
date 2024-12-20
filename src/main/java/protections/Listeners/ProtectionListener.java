@@ -10,6 +10,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,11 +18,9 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import protections.DataBase.Procedures.BlockCoordinateProcedures;
 import protections.DataBase.Procedures.FlagsProcedures;
+import protections.DataBase.Procedures.ProtectionMembersProcedures;
 import protections.DataBase.Procedures.ProtectionsProcedures;
-import protections.DatabaseEntities.Protections.Coordinate;
-import protections.DatabaseEntities.Protections.Flags;
-import protections.DatabaseEntities.Protections.MenaInformation;
-import protections.DatabaseEntities.Protections.Protection;
+import protections.DatabaseEntities.Protections.*;
 import protections.Entities.Grid.ProtectionGrid;
 import protections.Entities.Grid.ProtectionRegion;
 import protections.Entities.Menas.Mena;
@@ -64,6 +63,15 @@ public class ProtectionListener implements Listener {
             }
         }
         return currentProtection;
+    }
+
+    @EventHandler
+    public void userEnteredOnServer(PlayerJoinEvent event){
+        Player player = event.getPlayer();
+        if (!ProtectionsPlugin.members.containsKey(player.getUniqueId())){
+            ProtectionsPlugin.members.put(player.getUniqueId(), new Member(player.getName(), player.getUniqueId()));
+            ProtectionMembersProcedures.add_member(player.getName(), player.getUniqueId());
+        }
     }
 
     @EventHandler

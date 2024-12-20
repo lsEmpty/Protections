@@ -16,6 +16,12 @@ permissions:
     description: The user with this permission can use all commands.
     default: op
     children:
+      protections.moderator: true
+      protections.user: true
+  protections.moderator:
+    description: Can use moderator commands
+    default: op
+    children:
       protections.user: true
   protections.user:
     description: The user with this permission can only use protection commands.

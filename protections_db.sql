@@ -185,6 +185,12 @@ begin
     where p.id = pa_id;
 end;$$
 
+create procedure get_user_number_homes()
+begin
+	select p.owner_uuid 'OWNER_UUID' ,count(p.id) 'NUMBER_OF_HOMES' from protections p where p.in_use = true
+    group by p.owner_uuid;
+end;$$
+
 -- -----------------------------------------------------
 -- PROCEDURES -- COORDINATES
 -- -----------------------------------------------------
@@ -274,18 +280,18 @@ end;$$
 -- PROCEDURES -- PROTECTIONS_MEMBERS
 -- -----------------------------------------------------
 
-create procedure add_member(
+create procedure add_member_to_protection(
 	pa_protections_id bigint,
     pa_protections_id_block_coordinate bigint,
     pa_protections_flags_id bigint,
-    pa_protections_members_id bigint
+    pa_protection_members_id bigint
 )
 begin
-	insert into protections_has_protection_members(protections_id, protections_id_block_coordinate, protections_flags_id, protections_members_id)
-    values(pa_protections_id, pa_protections_id_block_coordinate, pa_protections_flags_id, pa_protections_members_id);
+	insert into protections_has_protection_members(protections_id, protections_id_block_coordinate, protections_flags_id, protection_members_id)
+    values(pa_protections_id, pa_protections_id_block_coordinate, pa_protections_flags_id, pa_protection_members_id);
 end;$$
 
-create procedure get_all_members()
+create procedure get_all_members_with_protection()
 begin
 	select 
     /* --- Protections ---*/
@@ -299,21 +305,65 @@ begin
     order by phpm.protections_id desc;
 end;$$
 
-create procedure remove_member_from_protection(
-	pa_protections_id bigint,
-    pa_protections_members_id bigint
+create function get_id_by_uuid(
+	fc_uuid binary(16)
 )
+returns int
+deterministic
 begin
-	delete from protections_has_protection_members phpm
-    where phpm.protections_id = pa_protections_id and phpm.protection_members_id = pa_protections_members_id;
+	declare result_id int; 	
+    select pm.id into result_id from protection_members pm where pm.member_uuid = fc_uuid limit 1;
+    return result_id;
 end;$$
 
+create function get_id_from_protections_by_coordinate_and_flags_id(
+	pa_id_block_coordinate bigint,
+    pa_id_flags bigint
+)
+returns bigint
+deterministic
+begin
+	declare id_protection bigint;
+    select p.id into id_protection from protections p 
+    where p.id_block_coordinate = pa_id_block_coordinate and p.id_flags = pa_id_flags
+    limit 1;
+    return id_protection;
+end;$$
+
+create procedure remove_member_from_protection(
+	pa_protections_id bigint,
+    pa_uuid_protections_members binary(16)
+)
+begin
+	declare id int;
+    set id = get_id_by_uuid(pa_uuid_protections_members);
+	delete from protections_has_protection_members phpm
+    where phpm.protections_id = pa_protections_id and phpm.protection_members_id = id;
+end;$$
+
+create procedure get_all_members()
+begin
+	select pm.name 'NAME_PROTECTION_MEMBER', pm.member_uuid 'UUID_PROTECTION_MEMBER' from protection_members pm;
+end;$$
+
+create procedure add_member(
+	pa_name varchar(18),
+    pa_uuid binary(16)
+)
+begin
+	insert into protection_members(name, member_uuid)
+    values(pa_name, pa_uuid);
+end;$$
 DELIMITER ;
+
+use protections_db;
 
 select * from protections;
 select * from block_coordinate;
 select * from flags;
 select * from mena_information;
+select * from protection_members;
 call get_all_members();
-
+call get_user_number_homes();
+select get_id_from_protections_by_coordinate_and_flags_id(1, 1);
 /**drop database protections_db;

@@ -28,6 +28,7 @@ import protections.Utils.MessageUtil;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static protections.ProtectionsPlugin.number_of_homes;
 import static protections.ProtectionsPlugin.prefix;
 import static protections.Service.GiveProtection.NAME_TO_GIVE;
 
@@ -49,6 +50,7 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
             Location location = event.getBlock().getLocation();
             if  (!CheckIntersections.check(location, container, plugin)){
                 event.setCancelled(true);
+                // ADD THIS MESSAGE IN CONFIG
                 event.getPlayer().sendMessage(prefix+ MessageUtil.color("&eThere is a protection near here. You can't put that protection."));
                 return;
             }
@@ -69,17 +71,29 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
                     mena_information = menaInformation;
                 }
             }
-            Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
             BlockCoordinateProcedures.createNewBlockCoordinate(x, y, z, x_dimension, z_dimension, date);
             long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
+            Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
+            coordinate.setId(id_block_coordinate);
             Flags flags = new Flags(true, true, false, false, true, true, true, true, false, false , false);
             long id_flag = FlagsProcedures.create_flags_and_get_id(flags);
+            flags.setId(id_flag);
             ProtectionsPlugin.protections
                     .put(event.getBlock().getLocation(),
                             new Protection(name, true, owner, uuid, world, coordinate, flags, mena_information));
             ProtectionsProcedures.createNewProtection(name, true, owner, uuid, world, id_block_coordinate, id_flag, mena_information.getId());
+            // ADD THIS MESSAGE IN CONFIG
             event.getPlayer().sendMessage(prefix+MessageUtil.color("&eProtection placed."));
             ProtectionGrid.addProtectionToGrid(new Protection(name, true, owner, uuid, world, coordinate, flags, mena_information));
+
+            UUID player_uuid = event.getPlayer().getUniqueId();
+            //Number of homes
+            if (!number_of_homes.containsKey(uuid)){
+                number_of_homes.put(uuid, 1);
+                return;
+            }
+            int homes = number_of_homes.get(event.getPlayer().getUniqueId()) + 1;
+            number_of_homes.put(uuid, homes);
         }
     }
 
@@ -94,6 +108,8 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
                 double z = location.getZ();
                 long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
                 long id_to_change_state = BlockCoordinateProcedures.getIdFromProtectionsWithBlockCoordinateId(id_block_coordinate);
+                long id_protection = ProtectionsProcedures.getIdProtectionWithIdBlockCoordinateAndIdFlags(protection.getBlock_coordinate().getId(), protection.getFlags().getId());
+                ProtectionsPlugin.protection_members_with_protection.remove(id_protection);
                 ProtectionsProcedures.changeStateProtection(id_to_change_state, false);
                 ProtectionsPlugin.protections.remove(location);
                 ProtectionGrid.removeProtectionToGrid(
@@ -109,11 +125,23 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(),"pca give " + event.getPlayer().getName() + " " + protection.getMenaInformation().getName_to_give());
                 }
                 event.setExpToDrop(0);
+                // ADD THIS MESSAGE IN CONFIG
                 event.getPlayer().sendMessage(prefix+MessageUtil.color("&eMena removed."));
                 event.setDropItems(false);
+
+                UUID player_uuid = event.getPlayer().getUniqueId();
+                //Number of homes
+                int homes = number_of_homes.get(event.getPlayer().getUniqueId()) - 1;
+                if (homes == 0){
+                    number_of_homes.remove(player_uuid);
+                    return;
+                }
+                number_of_homes.put(player_uuid, homes);
                 return;
             }
+            // ADD THIS MESSAGE IN CONFIG
             event.getPlayer().sendMessage(prefix+MessageUtil.color("&cYou must a owner of this protection."));
+            event.setCancelled(true);
         }
     }
 

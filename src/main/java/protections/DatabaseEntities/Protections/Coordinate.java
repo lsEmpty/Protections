@@ -78,4 +78,8 @@ public class Coordinate {
     public void setZ_dimension(double z_dimension) {
         this.z_dimension = z_dimension;
     }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

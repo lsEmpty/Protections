@@ -2,8 +2,11 @@ package protections;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import protections.Commands.AdminCommand;
+import protections.Commands.UserCommads;
 import protections.Config.Manager.ConfigManager;
 import protections.DataBase.BridgeConnection;
 import protections.DataBase.Procedures.MenaInformationProcedures;
@@ -14,14 +17,14 @@ import protections.DatabaseEntities.Protections.MenaInformation;
 import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Grid.ProtectionGrid;
 import protections.Entities.Menas.Mena;
-import protections.Listeners.FlagListener;
-import protections.Listeners.PlayerEntersAndLeavesOnProtectionListener;
-import protections.Listeners.PlayerPlacesAndBreaksProtectionListener;
-import protections.Listeners.ProtectionListener;
+import protections.Entities.PlayerInventory.PlayerCustomInventory;
+import protections.Listeners.*;
 import protections.Utils.MessageUtil;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class ProtectionsPlugin extends JavaPlugin {
 
@@ -31,7 +34,10 @@ public class ProtectionsPlugin extends JavaPlugin {
     public static Map<Location, Protection> protections;
     public static ProtectionGrid protectionGrid;
     public static List<MenaInformation> menas_on_db;
-    public static Map<Long, List<Member>> protection_members;
+    public static Map<Long, List<Member>> protection_members_with_protection;
+    public static Map<UUID, Member> members;
+    public static Map<UUID, Integer> number_of_homes;
+    public static Map<UUID, PlayerCustomInventory> onCustomInventory;
 
     // Credentials
     private String host;
@@ -50,7 +56,10 @@ public class ProtectionsPlugin extends JavaPlugin {
         protectionGrid = new ProtectionGrid(100);
         protections = ProtectionsProcedures.getProtectionsInUse();
         fillMenaInformationOnDataBase();
+        fillUserNumberHomes();
+        getMembersWithProtection();
         getMembers();
+        onCustomInventory = new HashMap<>();
         Bukkit.getConsoleSender().sendMessage(prefix+"enabled");
     }
 
@@ -85,18 +94,28 @@ public class ProtectionsPlugin extends JavaPlugin {
         menas_on_db = MenaInformationProcedures.get_all_mena_information();
     }
 
+    private void getMembersWithProtection(){
+        protection_members_with_protection = ProtectionMembersProcedures.get_all_members_with_protection();
+    }
+
     private void getMembers(){
-        protection_members = ProtectionMembersProcedures.get_all_members();
+        members = ProtectionMembersProcedures.get_all_members();
+    }
+
+    private void fillUserNumberHomes(){
+        number_of_homes = ProtectionsProcedures.getUserNumberHomes();
     }
 
     private void saveCommands(){
         getCommand("pca").setExecutor(new AdminCommand(this));
+        getCommand("pc").setExecutor(new UserCommads());
     }
 
     private void saveListeners(){
         getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerPlacesAndBreaksProtectionListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerEntersAndLeavesOnProtectionListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
         getServer().getPluginManager().registerEvents(new FlagListener(), this);
     }
 }

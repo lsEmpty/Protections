@@ -134,4 +134,8 @@ public class Flags {
     public void setTnt(boolean tnt) {
         this.tnt = tnt;
     }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 }

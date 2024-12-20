@@ -41,6 +41,7 @@ public class GiveProtection {
             return null;
         }
         if (sender instanceof Player){
+            // ADD THIS MESSAGE IN CONFIG
             sender.sendMessage(prefix+MessageUtil.color("&aMena delivered."));
         }
         return createMena(plugin, material_set, mena);

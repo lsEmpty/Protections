@@ -15,11 +15,13 @@ public class EnterAndLeave {
 
         // Detect join player
         if (currentProtection != null && currentProtection != previousProtection) {
+            // ADD THIS MESSAGE IN CONFIG
             player.sendMessage(MessageUtil.color(prefix+"&eYou have entered to " + currentProtection.getProtection().getName() + " protection."));
         }
 
         // Detect leave player
         if (currentProtection == null && previousProtection != null) {
+            // ADD THIS MESSAGE IN CONFIG
             player.sendMessage(MessageUtil.color(prefix +"&eYou have leaved to " + previousProtection.getProtection().getName() + " protection."));
         }
 
