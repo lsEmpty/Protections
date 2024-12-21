@@ -267,9 +267,7 @@ public class FlagListener implements Listener {
     }
 
     private boolean verifyIfUserIsMember(Protection protection, Player player){
-
-        long id_protection = ProtectionsProcedures.getIdProtectionWithIdBlockCoordinateAndIdFlags(protection.getBlock_coordinate().getId(), protection.getFlags().getId());
-        List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(id_protection);
+        List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(protection.getId());
         if (members != null){
             boolean aux = false;
             for (Member member : members){

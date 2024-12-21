@@ -60,19 +60,18 @@ public class UserCommads implements CommandExecutor {
                             Player player_add = Bukkit.getPlayer(name);
                             long id_flags = protection.getFlags().getId();
                             long id_block_coordinate = protection.getBlock_coordinate().getId();
-                            long id_protection = ProtectionsProcedures.getIdProtectionWithIdBlockCoordinateAndIdFlags(id_block_coordinate, id_flags);
                             assert player_add != null;
                             long id_member = ProtectionMembersProcedures.getIdByUuid(player_add.getUniqueId());
-                            if (ProtectionsPlugin.protection_members_with_protection.containsKey(id_protection)){
-                                List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(id_protection);
+                            if (ProtectionsPlugin.protection_members_with_protection.containsKey(protection.getId())){
+                                List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(protection.getId());
                                 members.add(new Member(id_member, player_add.getName(), player_add.getUniqueId()));
-                                ProtectionsPlugin.protection_members_with_protection.put(id_protection, members);
+                                ProtectionsPlugin.protection_members_with_protection.put(protection.getId(), members);
                             }else{
                                 List<Member> members = new ArrayList<>();
                                 members.add(new Member(id_member, player_add.getName(), player_add.getUniqueId()));
-                                ProtectionsPlugin.protection_members_with_protection.put(id_protection, members);
+                                ProtectionsPlugin.protection_members_with_protection.put(protection.getId(), members);
                             }
-                            ProtectionMembersProcedures.add_member_to_protection(id_protection, id_block_coordinate, id_flags, id_member);
+                            ProtectionMembersProcedures.add_member_to_protection(protection.getId(), id_block_coordinate, id_flags, id_member);
                             player.sendMessage(prefix+MessageUtil.color("&e"+player_add.getName()+"&a was added to protection"));
                         }else{
                             player.sendMessage(prefix+MessageUtil.color("&eThis user doesn't exists or isn't connected"));

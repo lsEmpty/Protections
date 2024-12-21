@@ -48,6 +48,7 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
                 .has(new NamespacedKey(plugin, GiveProtection.X_DIMENSION), PersistentDataType.INTEGER)){
             PersistentDataContainer container = protection_meta.getPersistentDataContainer();
             Location location = event.getBlock().getLocation();
+            // Check if there is a protection near
             if  (!CheckIntersections.check(location, container, plugin)){
                 event.setCancelled(true);
                 // ADD THIS MESSAGE IN CONFIG
@@ -71,6 +72,7 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
                     mena_information = menaInformation;
                 }
             }
+            //DB and Add to lists and maps
             BlockCoordinateProcedures.createNewBlockCoordinate(x, y, z, x_dimension, z_dimension, date);
             long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
             Coordinate coordinate = new Coordinate(x, y, z, x_dimension, z_dimension, date);
@@ -78,15 +80,15 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
             Flags flags = new Flags(true, true, false, false, true, true, true, true, false, false , false);
             long id_flag = FlagsProcedures.create_flags_and_get_id(flags);
             flags.setId(id_flag);
-            ProtectionsPlugin.protections
-                    .put(event.getBlock().getLocation(),
-                            new Protection(name, true, owner, uuid, world, coordinate, flags, mena_information));
             ProtectionsProcedures.createNewProtection(name, true, owner, uuid, world, id_block_coordinate, id_flag, mena_information.getId());
+            long id_protection = ProtectionsProcedures.getIdProtectionWithIdBlockCoordinateAndIdFlags(id_block_coordinate, id_flag);
+            Protection protection_to_add = new Protection(id_protection ,name, true, owner, uuid, world, coordinate, flags, mena_information);
+            ProtectionsPlugin.protections
+                    .put(event.getBlock().getLocation(), protection_to_add);
             // ADD THIS MESSAGE IN CONFIG
             event.getPlayer().sendMessage(prefix+MessageUtil.color("&eProtection placed."));
-            ProtectionGrid.addProtectionToGrid(new Protection(name, true, owner, uuid, world, coordinate, flags, mena_information));
+            ProtectionGrid.addProtectionToGrid(protection_to_add);
 
-            UUID player_uuid = event.getPlayer().getUniqueId();
             //Number of homes
             if (!number_of_homes.containsKey(uuid)){
                 number_of_homes.put(uuid, 1);
@@ -108,8 +110,7 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
                 double z = location.getZ();
                 long id_block_coordinate = BlockCoordinateProcedures.getIdFromBlockCoordinateWithCoordinate(x, y, z);
                 long id_to_change_state = BlockCoordinateProcedures.getIdFromProtectionsWithBlockCoordinateId(id_block_coordinate);
-                long id_protection = ProtectionsProcedures.getIdProtectionWithIdBlockCoordinateAndIdFlags(protection.getBlock_coordinate().getId(), protection.getFlags().getId());
-                ProtectionsPlugin.protection_members_with_protection.remove(id_protection);
+                ProtectionsPlugin.protection_members_with_protection.remove(protection.getId());
                 ProtectionsProcedures.changeStateProtection(id_to_change_state, false);
                 ProtectionsPlugin.protections.remove(location);
                 ProtectionGrid.removeProtectionToGrid(

@@ -55,27 +55,25 @@ public class ServiceUserCommands {
     public static void infoCommandMembers(Player player, ProtectionsPlugin plugin){
         ProtectionRegion currentProtection = ProtectionListener.getCurrentProtection(player.getLocation());
         Protection protection = currentProtection.getProtection();
-        long id_protection = ProtectionsProcedures.getIdProtectionWithIdBlockCoordinateAndIdFlags(protection.getBlock_coordinate().getId(), protection.getFlags().getId());
-        if (id_protection != 0){
-            Inventory inventory = Bukkit.createInventory(null, 54, MessageUtil.color("&8Members"));
-            List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(id_protection);
-            if (members != null){
-                int aux = 9;
-                for (Member member : members){
-                    inventory.setItem(aux, PersonalizedItem.memberOnMembers(member, plugin));
-                    aux++;
-                }
+
+        Inventory inventory = Bukkit.createInventory(null, 54, MessageUtil.color("&8Members"));
+        List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(protection.getId());
+        if (members != null){
+            int aux = 9;
+            for (Member member : members){
+                inventory.setItem(aux, PersonalizedItem.memberOnMembers(member, plugin));
+                aux++;
             }
-            for (int i = 0; i < 9; i++) {
-                inventory.setItem(i, new ItemStack(Material.BLUE_STAINED_GLASS_PANE));
-            }
-            for (int i = 45; i < 54; i++) {
-                inventory.setItem(i, new ItemStack(Material.BLUE_STAINED_GLASS_PANE));
-            }
-            inventory.setItem(49, PersonalizedItem.back());
-            player.openInventory(inventory);
-            ProtectionsPlugin.onCustomInventory.put(player.getUniqueId(), new PlayerCustomInventory(player, InventoryType.MEMBERS_INVENTORY));
         }
+        for (int i = 0; i < 9; i++) {
+            inventory.setItem(i, new ItemStack(Material.BLUE_STAINED_GLASS_PANE));
+        }
+        for (int i = 45; i < 54; i++) {
+            inventory.setItem(i, new ItemStack(Material.BLUE_STAINED_GLASS_PANE));
+        }
+        inventory.setItem(49, PersonalizedItem.back());
+        player.openInventory(inventory);
+        ProtectionsPlugin.onCustomInventory.put(player.getUniqueId(), new PlayerCustomInventory(player, InventoryType.MEMBERS_INVENTORY));
     }
 
     public static void infoCommandRemoveMember(Player owner, String player_uuid_to_remove, ProtectionsPlugin plugin){
@@ -90,15 +88,12 @@ public class ServiceUserCommands {
     public static void removeMemberOnMembers(Player owner, UUID player_uuid_to_remove){
         ProtectionRegion currentProtection = ProtectionListener.getCurrentProtection(owner.getLocation());
         Protection protection = currentProtection.getProtection();
-        long id_protection = ProtectionsProcedures.getIdProtectionWithIdBlockCoordinateAndIdFlags(protection.getBlock_coordinate().getId(), protection.getFlags().getId());
-        if (id_protection != 0){
-            List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(id_protection);
-            for (Member member : members){
-                if (member.getUuid_member().equals(player_uuid_to_remove)){
-                    members.remove(member);
-                    ProtectionMembersProcedures.remove_member_from_protection(id_protection, player_uuid_to_remove);
-                    return;
-                }
+        List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(protection.getId());
+        for (Member member : members){
+            if (member.getUuid_member().equals(player_uuid_to_remove)){
+                members.remove(member);
+                ProtectionMembersProcedures.remove_member_from_protection(protection.getId(), player_uuid_to_remove);
+                return;
             }
         }
     }
