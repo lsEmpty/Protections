@@ -58,9 +58,25 @@ public class UserCommads implements CommandExecutor {
                         String name = args[1];
                         if (Bukkit.getPlayer(name) != null){
                             Player player_add = Bukkit.getPlayer(name);
+                            assert player_add != null;
+                            // Verify if user is the owner of protection
+                            if (player_add.getUniqueId().equals(player.getUniqueId())){
+                                player.sendMessage(prefix+MessageUtil.color("&cYou can't add your self."));
+                                return true;
+                            }
+                            // Verify user is already on protection
+                            List<Member> members_on_protection = ProtectionsPlugin.protection_members_with_protection.get(protection.getId());
+                            if (members_on_protection != null){
+                                for (Member member : members_on_protection){
+                                    if (member.getUuid_member().equals(player_add.getUniqueId())){
+                                        player.sendMessage(prefix+MessageUtil.color("&eThis user is already in your protection."));
+                                        return true;
+                                    }
+                                }
+                            }
+                            // Add user
                             long id_flags = protection.getFlags().getId();
                             long id_block_coordinate = protection.getBlock_coordinate().getId();
-                            assert player_add != null;
                             long id_member = ProtectionMembersProcedures.getIdByUuid(player_add.getUniqueId());
                             if (ProtectionsPlugin.protection_members_with_protection.containsKey(protection.getId())){
                                 List<Member> members = ProtectionsPlugin.protection_members_with_protection.get(protection.getId());
