@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import protections.DataBase.Procedures.BlockCoordinateProcedures;
 import protections.DataBase.Procedures.FlagsProcedures;
+import protections.DataBase.Procedures.ProtectionMembersProcedures;
 import protections.DataBase.Procedures.ProtectionsProcedures;
 import protections.DatabaseEntities.Protections.Coordinate;
 import protections.DatabaseEntities.Protections.Flags;
@@ -129,7 +130,7 @@ public class PlayerPlacesAndBreaksProtectionListener implements Listener {
                 // ADD THIS MESSAGE IN CONFIG
                 event.getPlayer().sendMessage(prefix+MessageUtil.color("&eMena removed."));
                 event.setDropItems(false);
-
+                ProtectionMembersProcedures.removeAllMembersInAProtection(protection.getId());
                 UUID player_uuid = event.getPlayer().getUniqueId();
                 //Number of homes
                 int homes = number_of_homes.get(event.getPlayer().getUniqueId()) - 1;

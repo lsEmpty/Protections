@@ -11,7 +11,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import protections.DatabaseEntities.Protections.Protection;
 import protections.Entities.Enums.InventoryType;
+import protections.Entities.Grid.ProtectionRegion;
 import protections.Entities.PlayerInventory.PlayerCustomInventory;
 import protections.ProtectionsPlugin;
 import protections.Service.PersonalizedItem;
@@ -50,8 +52,14 @@ public class InventoryListener implements Listener {
                     }
                 }else if (customInventory.getInventoryType().equals(InventoryType.MEMBERS_INVENTORY)){
                     ItemStack item = event.getCurrentItem();
+                    ProtectionRegion currentProtection = ProtectionListener.getCurrentProtection(player.getLocation());
+                    Protection protection = currentProtection.getProtection();
                     if (item != null){
                         if (item.getType().equals(Material.PLAYER_HEAD)){
+                            if (!player.getUniqueId().equals(protection.getOwner_uuid())){
+                                event.setCancelled(true);
+                                return;
+                            }
                             ItemMeta meta = item.getItemMeta();
                             if (meta == null){
                                 return;

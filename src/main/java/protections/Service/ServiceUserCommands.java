@@ -40,10 +40,9 @@ public class ServiceUserCommands {
     }
 
     private static void infoCommandDashboard(Player player, Protection protection){
-        PlayerCustomInventory customInventory = new PlayerCustomInventory(player, InventoryType.DASHBOARD_INVENTORY);
         // ADD THIS MESSAGE IN CONFIG
         Inventory inventory = Bukkit.createInventory(null, 27, MessageUtil.color("&8Mena Information"));
-        inventory.setItem(10, PersonalizedItem.skullInformation(player));
+        inventory.setItem(10, PersonalizedItem.skullInformation(protection));
         inventory.setItem(13, PersonalizedItem.members());
         inventory.setItem(14, PersonalizedItem.flags());
         inventory.setItem(15, PersonalizedItem.homes());

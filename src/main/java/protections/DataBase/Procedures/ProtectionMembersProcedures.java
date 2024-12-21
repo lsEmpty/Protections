@@ -109,4 +109,15 @@ public class ProtectionMembersProcedures {
         }
         return id;
     }
+
+    public static void removeAllMembersInAProtection(long id_protection){
+        String query = "{call remove_all_members_in_a_protection(?)}";
+        try (Connection connection = ProtectionsPlugin.connection.getConnection();
+        CallableStatement statement = connection.prepareCall(query)){
+            statement.setLong(1, id_protection);
+            statement.execute();
+        }catch (SQLException e){
+            System.err.println("Error" + e);
+        }
+    }
 }

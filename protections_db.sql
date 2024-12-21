@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS `protections_db` DEFAULT CHARACTER SET utf8 ;
+CREATE DATABASE IF NOT EXISTS `protections_db` DEFAULT CHARACTER SET utf8 ;
 USE `protections_db` ;
 
 -- -----------------------------------------------------
@@ -354,6 +354,14 @@ begin
 	insert into protection_members(name, member_uuid)
     values(pa_name, pa_uuid);
 end;$$
+
+create procedure remove_all_members_in_a_protection(
+	pa_protections_id bigint
+)
+begin
+	delete from protections_has_protection_members phpm
+    where phpm.protections_id = pa_protections_id; 
+end;$$
 DELIMITER ;
 
 use protections_db;
@@ -366,4 +374,5 @@ select * from protection_members;
 call get_all_members();
 call get_user_number_homes();
 select get_id_from_protections_by_coordinate_and_flags_id(1, 1);
+select * from protections_has_protection_members;
 /**drop database protections_db;

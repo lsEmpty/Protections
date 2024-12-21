@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import protections.DatabaseEntities.Protections.Member;
+import protections.DatabaseEntities.Protections.Protection;
 import protections.ProtectionsPlugin;
 import protections.Utils.MessageUtil;
 
@@ -25,14 +26,14 @@ public class PersonalizedItem {
 
     public final static String MEMBER_ON_MEMBERS_UUID = "member_on_members_uuid";
 
-    public static ItemStack skullInformation(Player player){
+    public static ItemStack skullInformation(Protection protection){
         ItemStack skull = new ItemStack(Material.LECTERN);
         ItemMeta meta = skull.getItemMeta();
         if (meta != null){
             // ADD THIS MESSAGE IN CONFIG
-            meta.setDisplayName(MessageUtil.color("&7"+player.getName()+"&6 information"));
+            meta.setDisplayName(MessageUtil.color("&7"+protection.getOwner()+"&6 information"));
             List<String> lore = new ArrayList<>();
-            lore.add(MessageUtil.color(MessageUtil.color("&3☔ &bNumbers of home: &7") + number_of_homes.get(player.getUniqueId())));
+            lore.add(MessageUtil.color(MessageUtil.color("&3☔ &bNumbers of home: &7") + number_of_homes.get(protection.getOwner_uuid())));
             meta.setLore(lore);
             skull.setItemMeta(meta);
         }
